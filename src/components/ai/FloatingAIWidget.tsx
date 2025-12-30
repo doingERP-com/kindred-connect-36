@@ -1,78 +1,134 @@
 import { useState, useEffect, useRef } from "react";
 import { Mic, MicOff, Loader2, Send } from "lucide-react";
-import SpeechRecognition, {
-  useSpeechRecognition,
-} from "react-speech-recognition";
 import { useToast } from "@/hooks/use-toast";
+import { RetellWebClient } from "retell-client-js-sdk";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
 
+const AGENT_ID = "agent_ec9be380f089686b64dce6289a";
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lisa-chat`;
 
 export function FloatingAIWidget() {
+  const [isCallActive, setIsCallActive] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isWebListening, setIsWebListening] = useState(false);
+  const retellClientRef = useRef<RetellWebClient | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // 🎙️ Speech Recognition
-  const {
-    transcript,
-    listening,
-    resetTranscript,
-    browserSupportsSpeechRecognition,
-  } = useSpeechRecognition();
+  useEffect(() => {
+    return () => {
+      if (retellClientRef.current) {
+        retellClientRef.current.stopCall();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  /* ---------------- WEB CALL (Browser STT) ---------------- */
+  const startCall = async () => {
+    setIsConnecting(true);
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
 
-  const startWebCall = () => {
-    if (!browserSupportsSpeechRecognition) {
+      const { data, error } = await supabase.functions.invoke("retell-create-web-call", {
+        body: { agent_id: AGENT_ID },
+      });
+
+      if (error || !data?.access_token) {
+        throw new Error(error?.message || "Failed to get access token");
+      }
+
+      const retellWebClient = new RetellWebClient();
+      retellClientRef.current = retellWebClient;
+
+      retellWebClient.on("call_started", () => {
+        console.log("Call started");
+        setIsCallActive(true);
+        setIsConnecting(false);
+      });
+
+      retellWebClient.on("call_ended", () => {
+        console.log("Call ended");
+        setIsCallActive(false);
+        setIsSpeaking(false);
+      });
+
+      retellWebClient.on("agent_start_talking", () => {
+        setIsSpeaking(true);
+      });
+
+      retellWebClient.on("agent_stop_talking", () => {
+        setIsSpeaking(false);
+      });
+
+      retellWebClient.on("update", (update: { transcript?: { role: string; content: string }[] }) => {
+        if (update.transcript) {
+          const newMessages = update.transcript.map((t) => ({
+            role: (t.role === "agent" ? "assistant" : "user") as "user" | "assistant",
+            content: t.content,
+          }));
+          setMessages(newMessages);
+        }
+      });
+
+      retellWebClient.on("error", (error: Error) => {
+        console.error("Retell error:", error);
+        toast({
+          title: "Connection Error",
+          description: "Failed to connect to Lisa. Please try again.",
+          variant: "destructive",
+        });
+        setIsCallActive(false);
+        setIsConnecting(false);
+      });
+
+      await retellWebClient.startCall({
+        accessToken: data.access_token,
+        sampleRate: 24000,
+      });
+    } catch (error) {
+      console.error("Failed to start call:", error);
       toast({
-        title: "Not Supported",
-        description: "Your browser does not support speech recognition.",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to start voice call",
         variant: "destructive",
       });
-      return;
-    }
-
-    resetTranscript();
-    setIsWebListening(true);
-
-    SpeechRecognition.startListening({
-      continuous: true,
-      language: "en-US",
-    });
-  };
-
-  const stopWebCall = () => {
-    SpeechRecognition.stopListening();
-    setIsWebListening(false);
-
-    if (transcript.trim()) {
-      setInputText(transcript.trim());
+      setIsConnecting(false);
     }
   };
 
-  /* ---------------- SEND MESSAGE ---------------- */
+  const stopCall = () => {
+    if (retellClientRef.current) {
+      retellClientRef.current.stopCall();
+      retellClientRef.current = null;
+    }
+    setIsCallActive(false);
+    setIsSpeaking(false);
+  };
+
+  const handleToggleCall = () => {
+    if (isCallActive) {
+      stopCall();
+    } else {
+      startCall();
+    }
+  };
 
   const sendTextMessage = async () => {
     if (!inputText.trim() || isLoading) return;
 
-    const userMessage: Message = {
-      role: "user",
-      content: inputText.trim(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    const userMessage: Message = { role: "user", content: inputText.trim() };
+    setMessages(prev => [...prev, userMessage]);
     setInputText("");
     setIsLoading(true);
 
@@ -85,9 +141,7 @@ export function FloatingAIWidget() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({
-          messages: [...messages, userMessage],
-        }),
+        body: JSON.stringify({ messages: [...messages, userMessage] }),
       });
 
       if (!resp.ok || !resp.body) {
@@ -109,37 +163,38 @@ export function FloatingAIWidget() {
           let line = buffer.slice(0, newlineIndex);
           buffer = buffer.slice(newlineIndex + 1);
 
-          if (line.startsWith("data: ")) {
-            const jsonStr = line.slice(6).trim();
-            if (jsonStr === "[DONE]") break;
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
 
-            try {
-              const parsed = JSON.parse(jsonStr);
-              const content = parsed.choices?.[0]?.delta?.content;
-              if (content) {
-                assistantContent += content;
-                setMessages((prev) => {
-                  const last = prev[prev.length - 1];
-                  if (last?.role === "assistant") {
-                    return prev.map((m, i) =>
-                      i === prev.length - 1
-                        ? { ...m, content: assistantContent }
-                        : m
-                    );
-                  }
-                  return [...prev, { role: "assistant", content: assistantContent }];
-                });
-              }
-            } catch {
-              // ignore partial JSON
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) {
+              assistantContent += content;
+              setMessages(prev => {
+                const last = prev[prev.length - 1];
+                if (last?.role === "assistant") {
+                  return prev.map((m, i) => 
+                    i === prev.length - 1 ? { ...m, content: assistantContent } : m
+                  );
+                }
+                return [...prev, { role: "assistant", content: assistantContent }];
+              });
             }
+          } catch {
+            // Incomplete JSON, continue
           }
         }
       }
     } catch (error) {
+      console.error("Chat error:", error);
       toast({
         title: "Error",
-        description: "Failed to send message",
+        description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -154,23 +209,23 @@ export function FloatingAIWidget() {
     }
   };
 
-  /* ---------------- UI ---------------- */
-
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl">
-      {/* Messages */}
+      {/* Messages Area */}
       {messages.length > 0 && (
-        <div className="mb-3 max-h-60 overflow-y-auto space-y-2 px-4">
+        <div className="mb-3 max-h-60 overflow-y-auto space-y-2 px-4 scrollbar-thin">
           {messages.map((m, i) => (
             <div
               key={i}
               className={`text-sm p-3 rounded-lg ${
                 m.role === "assistant"
-                  ? "bg-card/80"
-                  : "bg-secondary/50 ml-8"
+                  ? "bg-card/80 text-foreground"
+                  : "bg-secondary/50 text-muted-foreground ml-8"
               }`}
             >
-              <strong>{m.role === "assistant" ? "Lisa: " : "You: "}</strong>
+              <span className="font-medium text-xs text-primary mr-2">
+                {m.role === "assistant" ? "Lisa:" : "You:"}
+              </span>
               {m.content}
             </div>
           ))}
@@ -178,57 +233,71 @@ export function FloatingAIWidget() {
         </div>
       )}
 
-      {/* Input */}
+      {/* Main Input Bar */}
       <div className="relative flex items-center">
-        {isWebListening && transcript && (
-          <div className="absolute -top-8 left-4 right-4 text-sm italic text-muted-foreground truncate">
-            🎙️ {transcript}
-          </div>
-        )}
-
-        <div className="flex-1 bg-card/80 rounded-full flex items-center pr-2">
+        <div 
+          className="flex-1 bg-card/80 backdrop-blur-sm border border-border/30 rounded-full flex items-center pr-2"
+          style={{ 
+            background: 'linear-gradient(145deg, hsl(222 47% 12% / 0.9) 0%, hsl(222 47% 8% / 0.95) 100%)'
+          }}
+        >
           <input
+            type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask Lisa about ERP, Oracle HCM, implementations..."
-            className="flex-1 py-4 px-6 bg-transparent outline-none"
-            disabled={isLoading || isWebListening}
+            placeholder="Ask Lisa about ERP issues, Oracle Cloud HCM, or implementations..."
+            className="flex-1 py-4 px-6 bg-transparent text-foreground placeholder:text-muted-foreground text-base outline-none"
+            disabled={isLoading || isCallActive}
           />
-
-          {inputText.trim() && !isWebListening && (
+          
+          {/* Send Button */}
+          {inputText.trim() && !isCallActive && (
             <button
               onClick={sendTextMessage}
-              className="w-10 h-10 rounded-full flex items-center justify-center"
+              disabled={isLoading}
+              className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary/50 hover:bg-secondary transition-colors mr-2"
             >
               {isLoading ? (
-                <Loader2 className="animate-spin" />
+                <Loader2 className="w-5 h-5 text-primary animate-spin" />
               ) : (
-                <Send />
+                <Send className="w-5 h-5 text-primary" />
               )}
             </button>
           )}
-
+          
           {/* Mic Button */}
           <button
-            onClick={() =>
-              isWebListening ? stopWebCall() : startWebCall()
-            }
-            className={`w-14 h-14 rounded-full flex items-center justify-center ${
-              isWebListening ? "bg-primary animate-pulse" : "bg-primary"
+            onClick={handleToggleCall}
+            disabled={isConnecting || isLoading}
+            className={`w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 ${
+              isCallActive
+                ? isSpeaking
+                  ? "bg-primary animate-pulse shadow-[0_0_30px_hsl(187_100%_42%/0.5)]"
+                  : "bg-primary shadow-[0_0_20px_hsl(187_100%_42%/0.4)]"
+                : "bg-primary hover:scale-105 hover:shadow-[0_0_25px_hsl(187_100%_42%/0.4)]"
             }`}
           >
-            {isWebListening ? <MicOff /> : <Mic />}
+            {isConnecting ? (
+              <Loader2 className="w-6 h-6 text-primary-foreground animate-spin" />
+            ) : isCallActive ? (
+              <MicOff className="w-6 h-6 text-primary-foreground" />
+            ) : (
+              <Mic className="w-6 h-6 text-primary-foreground" />
+            )}
           </button>
         </div>
       </div>
 
-      <p className="text-center text-sm text-muted-foreground mt-3">
-        {isWebListening
-          ? "Listening… Speak now"
+      {/* Helper Text */}
+      <p className="text-center text-muted-foreground text-sm mt-4">
+        {isCallActive
+          ? isSpeaking
+            ? "Lisa is speaking..."
+            : "Listening... Speak now"
           : isLoading
-          ? "Lisa is thinking…"
-          : "Type or click the mic to speak"}
+            ? "Lisa is thinking..."
+            : "Type a message or click the mic to speak with Lisa"}
       </p>
     </div>
   );
