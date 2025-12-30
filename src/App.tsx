@@ -9,6 +9,7 @@ import About from "./pages/About";
 import Consultants from "./pages/Consultants";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import { FloatingAIWidget } from "@/components/ai/FloatingAIWidget";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <FloatingAIWidget />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
