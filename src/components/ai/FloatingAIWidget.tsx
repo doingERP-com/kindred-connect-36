@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Mic, MicOff, X, Loader2, MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Mic, MicOff, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { RetellWebClient } from "retell-client-js-sdk";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,19 +12,12 @@ interface Transcript {
 const AGENT_ID = "agent_ec9be380f089686b64dce6289a";
 
 export function FloatingAIWidget() {
-  const [isOpen, setIsOpen] = useState(false);
   const [isCallActive, setIsCallActive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcripts, setTranscripts] = useState<Transcript[]>([]);
-  const [inputText, setInputText] = useState("");
   const retellClientRef = useRef<RetellWebClient | null>(null);
-  const transcriptEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    transcriptEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [transcripts]);
 
   useEffect(() => {
     return () => {
@@ -39,10 +30,8 @@ export function FloatingAIWidget() {
   const startCall = async () => {
     setIsConnecting(true);
     try {
-      // Request microphone permission
       await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      // Get access token from edge function
       const { data, error } = await supabase.functions.invoke("retell-create-web-call", {
         body: { agent_id: AGENT_ID },
       });
@@ -51,11 +40,9 @@ export function FloatingAIWidget() {
         throw new Error(error?.message || "Failed to get access token");
       }
 
-      // Initialize Retell client
       const retellWebClient = new RetellWebClient();
       retellClientRef.current = retellWebClient;
 
-      // Set up event listeners
       retellWebClient.on("call_started", () => {
         console.log("Call started");
         setIsCallActive(true);
@@ -98,7 +85,6 @@ export function FloatingAIWidget() {
         setIsConnecting(false);
       });
 
-      // Start the call
       await retellWebClient.startCall({
         accessToken: data.access_token,
         sampleRate: 24000,
@@ -132,104 +118,73 @@ export function FloatingAIWidget() {
   };
 
   return (
-    <>
-      {/* Floating Widget Button - shows when closed */}
-      {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full gradient-primary glow-primary flex items-center justify-center shadow-2xl hover:scale-110 transition-transform duration-300"
-          aria-label="Open AI Assistant"
-        >
-          <MessageCircle className="w-7 h-7 text-primary-foreground" />
-        </button>
-      )}
-
-      {/* Main Widget Panel */}
-      {isOpen && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-2xl animate-fade-up">
-          <div className="glass-card rounded-3xl p-6 border-primary/20 relative overflow-hidden">
-            {/* Background Glow */}
-            <div className="absolute top-0 right-0 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
-            
-            {/* Close Button */}
-            <button
-              onClick={() => {
-                stopCall();
-                setIsOpen(false);
-              }}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors z-10"
+    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl">
+      {/* Transcript Area - Only shows when there are transcripts */}
+      {transcripts.length > 0 && (
+        <div className="mb-3 max-h-40 overflow-y-auto space-y-2 px-4">
+          {transcripts.map((t, i) => (
+            <div
+              key={i}
+              className={`text-sm p-2 rounded-lg ${
+                t.role === "agent"
+                  ? "bg-card/80 text-foreground"
+                  : "bg-secondary/50 text-muted-foreground ml-8"
+              }`}
             >
-              <X size={20} />
-            </button>
-
-            {/* Transcript Area */}
-            {transcripts.length > 0 && (
-              <div className="mb-4 max-h-48 overflow-y-auto space-y-2 pr-2">
-                {transcripts.map((t, i) => (
-                  <div
-                    key={i}
-                    className={`text-sm p-2 rounded-lg ${
-                      t.role === "agent"
-                        ? "bg-primary/10 text-foreground"
-                        : "bg-secondary text-muted-foreground ml-8"
-                    }`}
-                  >
-                    <span className="font-medium text-xs text-primary mr-2">
-                      {t.role === "agent" ? "Lisa:" : "You:"}
-                    </span>
-                    {t.content}
-                  </div>
-                ))}
-                <div ref={transcriptEndRef} />
-              </div>
-            )}
-
-            {/* Input Area */}
-            <div className="relative flex items-center gap-3">
-              <div className="flex-1 relative">
-                <Input
-                  type="text"
-                  placeholder="Ask Lisa about ERP issues, Oracle Cloud HCM, or implementations..."
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  className="w-full bg-secondary/50 border-border/50 rounded-full py-6 pl-5 pr-4 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/50"
-                  disabled={isCallActive}
-                />
-              </div>
-
-              {/* Voice Button */}
-              <Button
-                onClick={handleToggleCall}
-                disabled={isConnecting}
-                className={`w-14 h-14 rounded-full flex-shrink-0 transition-all duration-300 ${
-                  isCallActive
-                    ? isSpeaking
-                      ? "bg-primary animate-pulse glow-primary"
-                      : "bg-primary glow-primary"
-                    : "gradient-primary hover:scale-105"
-                }`}
-              >
-                {isConnecting ? (
-                  <Loader2 className="w-6 h-6 text-primary-foreground animate-spin" />
-                ) : isCallActive ? (
-                  <MicOff className="w-6 h-6 text-primary-foreground" />
-                ) : (
-                  <Mic className="w-6 h-6 text-primary-foreground" />
-                )}
-              </Button>
+              <span className="font-medium text-xs text-primary mr-2">
+                {t.role === "agent" ? "Lisa:" : "You:"}
+              </span>
+              {t.content}
             </div>
-
-            {/* Helper Text */}
-            <p className="text-center text-muted-foreground text-sm mt-4">
-              {isCallActive
-                ? isSpeaking
-                  ? "Lisa is speaking..."
-                  : "Listening... Speak now"
-                : "Type or click the mic to speak with Lisa, your AI ERP expert"}
-            </p>
-          </div>
+          ))}
         </div>
       )}
-    </>
+
+      {/* Main Input Bar */}
+      <div className="relative flex items-center">
+        <div 
+          className="flex-1 bg-card/80 backdrop-blur-sm border border-border/30 rounded-full flex items-center pr-2"
+          style={{ 
+            background: 'linear-gradient(145deg, hsl(222 47% 12% / 0.9) 0%, hsl(222 47% 8% / 0.95) 100%)'
+          }}
+        >
+          <div className="flex-1 py-4 px-6">
+            <span className="text-muted-foreground text-base">
+              Ask Lisa about ERP issues, Oracle Cloud HCM, or implementations...
+            </span>
+          </div>
+          
+          {/* Mic Button */}
+          <button
+            onClick={handleToggleCall}
+            disabled={isConnecting}
+            className={`w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 ${
+              isCallActive
+                ? isSpeaking
+                  ? "bg-primary animate-pulse shadow-[0_0_30px_hsl(187_100%_42%/0.5)]"
+                  : "bg-primary shadow-[0_0_20px_hsl(187_100%_42%/0.4)]"
+                : "bg-primary hover:scale-105 hover:shadow-[0_0_25px_hsl(187_100%_42%/0.4)]"
+            }`}
+          >
+            {isConnecting ? (
+              <Loader2 className="w-6 h-6 text-primary-foreground animate-spin" />
+            ) : isCallActive ? (
+              <MicOff className="w-6 h-6 text-primary-foreground" />
+            ) : (
+              <Mic className="w-6 h-6 text-primary-foreground" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Helper Text */}
+      <p className="text-center text-muted-foreground text-sm mt-4">
+        {isCallActive
+          ? isSpeaking
+            ? "Lisa is speaking..."
+            : "Listening... Speak now"
+          : "Type or click the mic to speak with Lisa, your AI ERP expert"}
+      </p>
+    </div>
   );
 }
