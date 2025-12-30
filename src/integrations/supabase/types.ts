@@ -14,7 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      consultants: {
+        Row: {
+          can_relocate: boolean | null
+          city: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          experience: number | null
+          first_name: string
+          hourly_rate: number | null
+          id: string
+          last_name: string
+          phone: string | null
+          profile_summary: string | null
+          project_category: string | null
+          rating: number | null
+          skill_1: string | null
+          skill_10: string | null
+          skill_2: string | null
+          skill_3: string | null
+          skill_4: string | null
+          skill_5: string | null
+          skill_6: string | null
+          skill_7: string | null
+          skill_8: string | null
+          skill_9: string | null
+          state: string | null
+          title: string | null
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          can_relocate?: boolean | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          experience?: number | null
+          first_name: string
+          hourly_rate?: number | null
+          id?: string
+          last_name: string
+          phone?: string | null
+          profile_summary?: string | null
+          project_category?: string | null
+          rating?: number | null
+          skill_1?: string | null
+          skill_10?: string | null
+          skill_2?: string | null
+          skill_3?: string | null
+          skill_4?: string | null
+          skill_5?: string | null
+          skill_6?: string | null
+          skill_7?: string | null
+          skill_8?: string | null
+          skill_9?: string | null
+          state?: string | null
+          title?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          can_relocate?: boolean | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          experience?: number | null
+          first_name?: string
+          hourly_rate?: number | null
+          id?: string
+          last_name?: string
+          phone?: string | null
+          profile_summary?: string | null
+          project_category?: string | null
+          rating?: number | null
+          skill_1?: string | null
+          skill_10?: string | null
+          skill_2?: string | null
+          skill_3?: string | null
+          skill_4?: string | null
+          skill_5?: string | null
+          skill_6?: string | null
+          skill_7?: string | null
+          skill_8?: string | null
+          skill_9?: string | null
+          state?: string | null
+          title?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
