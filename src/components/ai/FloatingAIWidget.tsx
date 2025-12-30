@@ -1,22 +1,26 @@
 import { useState, useEffect, useRef } from "react";
-import { Mic, MicOff, Loader2 } from "lucide-react";
+import { Mic, MicOff, Loader2, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { RetellWebClient } from "retell-client-js-sdk";
 import { supabase } from "@/integrations/supabase/client";
 
-interface Transcript {
-  role: "agent" | "user";
+interface Message {
+  role: "user" | "assistant";
   content: string;
 }
 
 const AGENT_ID = "agent_ec9be380f089686b64dce6289a";
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lisa-chat`;
 
 export function FloatingAIWidget() {
   const [isCallActive, setIsCallActive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [transcripts, setTranscripts] = useState<Transcript[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputText, setInputText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const retellClientRef = useRef<RetellWebClient | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -26,6 +30,10 @@ export function FloatingAIWidget() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const startCall = async () => {
     setIsConnecting(true);
@@ -65,12 +73,11 @@ export function FloatingAIWidget() {
 
       retellWebClient.on("update", (update: { transcript?: { role: string; content: string }[] }) => {
         if (update.transcript) {
-          setTranscripts(
-            update.transcript.map((t) => ({
-              role: t.role as "agent" | "user",
-              content: t.content,
-            }))
-          );
+          const newMessages = update.transcript.map((t) => ({
+            role: (t.role === "agent" ? "assistant" : "user") as "user" | "assistant",
+            content: t.content,
+          }));
+          setMessages(newMessages);
         }
       });
 
@@ -117,26 +124,112 @@ export function FloatingAIWidget() {
     }
   };
 
+  const sendTextMessage = async () => {
+    if (!inputText.trim() || isLoading) return;
+
+    const userMessage: Message = { role: "user", content: inputText.trim() };
+    setMessages(prev => [...prev, userMessage]);
+    setInputText("");
+    setIsLoading(true);
+
+    let assistantContent = "";
+
+    try {
+      const resp = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ messages: [...messages, userMessage] }),
+      });
+
+      if (!resp.ok || !resp.body) {
+        throw new Error("Failed to get response");
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex;
+        while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+          let line = buffer.slice(0, newlineIndex);
+          buffer = buffer.slice(newlineIndex + 1);
+
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) {
+              assistantContent += content;
+              setMessages(prev => {
+                const last = prev[prev.length - 1];
+                if (last?.role === "assistant") {
+                  return prev.map((m, i) => 
+                    i === prev.length - 1 ? { ...m, content: assistantContent } : m
+                  );
+                }
+                return [...prev, { role: "assistant", content: assistantContent }];
+              });
+            }
+          } catch {
+            // Incomplete JSON, continue
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Chat error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendTextMessage();
+    }
+  };
+
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl">
-      {/* Transcript Area - Only shows when there are transcripts */}
-      {transcripts.length > 0 && (
-        <div className="mb-3 max-h-40 overflow-y-auto space-y-2 px-4">
-          {transcripts.map((t, i) => (
+      {/* Messages Area */}
+      {messages.length > 0 && (
+        <div className="mb-3 max-h-60 overflow-y-auto space-y-2 px-4 scrollbar-thin">
+          {messages.map((m, i) => (
             <div
               key={i}
-              className={`text-sm p-2 rounded-lg ${
-                t.role === "agent"
+              className={`text-sm p-3 rounded-lg ${
+                m.role === "assistant"
                   ? "bg-card/80 text-foreground"
                   : "bg-secondary/50 text-muted-foreground ml-8"
               }`}
             >
               <span className="font-medium text-xs text-primary mr-2">
-                {t.role === "agent" ? "Lisa:" : "You:"}
+                {m.role === "assistant" ? "Lisa:" : "You:"}
               </span>
-              {t.content}
+              {m.content}
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
       )}
 
@@ -148,16 +241,35 @@ export function FloatingAIWidget() {
             background: 'linear-gradient(145deg, hsl(222 47% 12% / 0.9) 0%, hsl(222 47% 8% / 0.95) 100%)'
           }}
         >
-          <div className="flex-1 py-4 px-6">
-            <span className="text-muted-foreground text-base">
-              Ask Lisa about ERP issues, Oracle Cloud HCM, or implementations...
-            </span>
-          </div>
+          <input
+            type="text"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask Lisa about ERP issues, Oracle Cloud HCM, or implementations..."
+            className="flex-1 py-4 px-6 bg-transparent text-foreground placeholder:text-muted-foreground text-base outline-none"
+            disabled={isLoading || isCallActive}
+          />
+          
+          {/* Send Button */}
+          {inputText.trim() && !isCallActive && (
+            <button
+              onClick={sendTextMessage}
+              disabled={isLoading}
+              className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary/50 hover:bg-secondary transition-colors mr-2"
+            >
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 text-primary animate-spin" />
+              ) : (
+                <Send className="w-5 h-5 text-primary" />
+              )}
+            </button>
+          )}
           
           {/* Mic Button */}
           <button
             onClick={handleToggleCall}
-            disabled={isConnecting}
+            disabled={isConnecting || isLoading}
             className={`w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 ${
               isCallActive
                 ? isSpeaking
@@ -183,7 +295,9 @@ export function FloatingAIWidget() {
           ? isSpeaking
             ? "Lisa is speaking..."
             : "Listening... Speak now"
-          : "Type or click the mic to speak with Lisa, your AI ERP expert"}
+          : isLoading
+            ? "Lisa is thinking..."
+            : "Type a message or click the mic to speak with Lisa"}
       </p>
     </div>
   );
