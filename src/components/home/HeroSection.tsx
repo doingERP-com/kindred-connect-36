@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Phone } from "lucide-react";
 
 export function HeroSection() {
   return (
@@ -12,42 +12,37 @@ export function HeroSection() {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-8">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-medium animate-fade-up">
-            <Sparkles size={16} />
-            Free AI-Powered ERP Support Available
-          </div>
-
           {/* Heading */}
-          <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight animate-fade-up" style={{ animationDelay: "0.1s" }}>
-            Transform Your{" "}
-            <span className="gradient-text">Enterprise Operations</span>
+          <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight animate-fade-up">
+            Stop losing productivity to{" "}
+            <span className="gradient-text">technical friction</span>
           </h1>
 
-          {/* Subheading */}
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            Expert Oracle Cloud HCM consulting with AI-enhanced delivery. We reduce deployment risk, accelerate timelines, and drive measurable business outcomes.
-          </p>
+          {/* Meet Lisa */}
+          <div className="space-y-4 animate-fade-up" style={{ animationDelay: "0.1s" }}>
+            <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground">
+              Meet Lisa
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Lisa is your 24/7 AI Agent that diagnoses complex ERP & HCM challenges and provides immediate expert intervention.
+            </p>
+          </div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-up" style={{ animationDelay: "0.2s" }}>
             <Link to="/contact">
               <Button variant="hero" size="xl" className="group">
-                Get Started
+                Schedule a Demo
                 <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
-            <Link to="/consultants">
-              <Button variant="glass" size="xl">
-                View Consultants
+            <a href="tel:+18447342790">
+              <Button variant="glass" size="xl" className="gap-2">
+                <Phone size={18} />
+                Call +1 844-734-2790 to see Lisa in Action
               </Button>
-            </Link>
+            </a>
           </div>
-
-          {/* Trust Indicator */}
-          <p className="text-sm text-muted-foreground animate-fade-up" style={{ animationDelay: "0.4s" }}>
-            Ask Lisa below about your ERP challenges — she's available 24/7
-          </p>
         </div>
       </div>
     </section>
