@@ -5,14 +5,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface ChatSession {
-  chat_id: string;
-  agent_id: string;
-}
-
-// Store chat sessions in memory (in production, use a database)
-const chatSessions = new Map<string, string>();
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -30,7 +22,7 @@ serve(async (req) => {
     if (action === "create_chat") {
       console.log("Creating chat session for agent:", agent_id);
       
-      const response = await fetch("https://api.retellai.com/v2/create-chat", {
+      const response = await fetch("https://api.retellai.com/create-chat", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${RETELL_API_KEY}`,
@@ -47,7 +39,7 @@ serve(async (req) => {
         throw new Error(`Retell API error: ${response.status} - ${errorText}`);
       }
 
-      const data: ChatSession = await response.json();
+      const data = await response.json();
       console.log("Chat session created:", data.chat_id);
 
       return new Response(JSON.stringify({ chat_id: data.chat_id }), {
@@ -63,7 +55,7 @@ serve(async (req) => {
 
       console.log("Sending message to chat:", session_id);
 
-      const response = await fetch("https://api.retellai.com/v2/create-chat-completion", {
+      const response = await fetch("https://api.retellai.com/create-chat-completion", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${RETELL_API_KEY}`,
