@@ -25,10 +25,10 @@ const About = () => {
   return (
     <>
       <Helmet>
-        <title>About Us - DOINGERP | Oracle Cloud HCM Experts</title>
+        <title>About Us - KairosFS | Oracle Cloud HCM Experts</title>
         <meta
           name="description"
-          content="Learn about DOINGERP's mission to transform enterprise operations through expert Oracle Cloud HCM consulting and AI-enhanced delivery."
+          content="Learn about KairosFS's mission to transform enterprise operations through expert Oracle Cloud HCM consulting and AI-enhanced delivery."
         />
       </Helmet>
       <div className="min-h-screen bg-background">
@@ -39,7 +39,7 @@ const About = () => {
             <div className="container mx-auto px-4">
               <div className="max-w-4xl mx-auto text-center space-y-6">
                 <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold animate-fade-up">
-                  About <span className="gradient-text">DOINGERP</span>
+                  About <span className="gradient-text">KairosFS</span>
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground leading-relaxed animate-fade-up" style={{ animationDelay: "0.1s" }}>
                   We are a team of passionate Oracle Cloud HCM specialists dedicated to transforming how enterprises manage their most valuable asset—their people.
