@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Mic, MicOff, Loader2, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { RetellWebClient } from "retell-client-js-sdk";
@@ -19,9 +19,21 @@ export function FloatingAIWidget() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGlowing, setIsGlowing] = useState(false);
   const retellClientRef = useRef<RetellWebClient | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Listen for glow trigger event
+  const handleGlowTrigger = useCallback(() => {
+    setIsGlowing(true);
+    setTimeout(() => setIsGlowing(false), 3000);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('triggerLisaGlow', handleGlowTrigger);
+    return () => window.removeEventListener('triggerLisaGlow', handleGlowTrigger);
+  }, [handleGlowTrigger]);
 
   useEffect(() => {
     return () => {
@@ -210,7 +222,7 @@ export function FloatingAIWidget() {
   };
 
   return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl">
+    <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl transition-all duration-500 ${isGlowing ? 'scale-105' : ''}`}>
       {/* Messages Area */}
       {messages.length > 0 && (
         <div className="mb-3 max-h-60 overflow-y-auto space-y-2 px-4 scrollbar-thin">
@@ -236,7 +248,11 @@ export function FloatingAIWidget() {
       {/* Main Input Bar */}
       <div className="relative flex items-center">
         <div 
-          className="flex-1 bg-card/80 backdrop-blur-sm border border-border/30 rounded-full flex items-center pr-2"
+          className={`flex-1 bg-card/80 backdrop-blur-sm border rounded-full flex items-center pr-2 transition-all duration-500 ${
+            isGlowing 
+              ? 'border-primary shadow-[0_0_40px_hsl(5_91%_52%/0.5),0_0_80px_hsl(5_91%_52%/0.3)] animate-pulse' 
+              : 'border-border/30'
+          }`}
           style={{ 
             background: 'linear-gradient(145deg, hsl(222 47% 12% / 0.9) 0%, hsl(222 47% 8% / 0.95) 100%)'
           }}

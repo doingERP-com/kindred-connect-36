@@ -72,10 +72,14 @@ export function HeroSection() {
               variant="hero" 
               size="xl" 
               className="group gap-2"
-              onClick={scrollToChat}
+              onClick={() => {
+                scrollToChat();
+                // Dispatch custom event to trigger glow
+                window.dispatchEvent(new CustomEvent('triggerLisaGlow'));
+              }}
             >
               <MessageCircle size={20} />
-              Try Lisa using the chat bar below
+              Chat & Talk with Lisa
             </Button>
             <a href="tel:+18447342790">
               <Button variant="glass" size="xl" className="gap-2">
@@ -88,10 +92,13 @@ export function HeroSection() {
           {/* Scroll Indicator pointing to chat */}
           <div className="pt-8 animate-fade-up" style={{ animationDelay: "0.4s" }}>
             <button 
-              onClick={scrollToChat}
+              onClick={() => {
+                scrollToChat();
+                window.dispatchEvent(new CustomEvent('triggerLisaGlow'));
+              }}
               className="flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-colors mx-auto group"
             >
-              <span className="text-sm font-medium">Chat with Lisa</span>
+              <span className="text-sm font-medium">Chat & Talk with Lisa</span>
               <div className="relative">
                 <ChevronDown size={24} className="animate-bounce-subtle" />
                 <div className="absolute inset-0 animate-pulse-ring">
