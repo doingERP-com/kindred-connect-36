@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin } from "lucide-react";
+import kairosLogo from "@/assets/kairosfs-logo.png";
 
 export function Footer() {
   return (
@@ -9,9 +10,7 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <Link to="/" className="inline-block">
-              <span className="font-heading text-2xl font-bold gradient-text">
-                DOINGERP
-              </span>
+              <img src={kairosLogo} alt="KairosFS" className="h-12 w-auto" />
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Expert Oracle Cloud HCM consulting with AI-enhanced delivery. We reduce deployment risk and accelerate timelines.
@@ -64,18 +63,18 @@ export function Footer() {
             <h4 className="font-heading font-semibold text-foreground">Contact</h4>
             <div className="space-y-3">
               <a
-                href="mailto:info@doingerp.com"
+                href="mailto:info@kairosfs.com"
                 className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors duration-300"
               >
                 <Mail size={16} className="text-primary" />
-                info@doingerp.com
+                info@kairosfs.com
               </a>
               <a
-                href="tel:+1234567890"
+                href="tel:+18447342790"
                 className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors duration-300"
               >
                 <Phone size={16} className="text-primary" />
-                +1 (234) 567-890
+                +1 844-734-2790
               </a>
               <p className="flex items-start gap-3 text-sm text-muted-foreground">
                 <MapPin size={16} className="text-primary mt-0.5" />
@@ -88,7 +87,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border/50 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} DOINGERP. All rights reserved.
+            © {new Date().getFullYear()} KairosFS. All rights reserved.
           </p>
           <div className="flex gap-6">
             <Link to="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">

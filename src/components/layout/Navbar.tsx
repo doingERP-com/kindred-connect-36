@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import kairosLogo from "@/assets/kairosfs-logo.png";
 
 const navLinks = [
   { name: "Home", path: "/" },
@@ -19,9 +20,7 @@ export function Navbar() {
       <nav className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <span className="font-heading text-2xl font-bold gradient-text">
-            DOINGERP
-          </span>
+          <img src={kairosLogo} alt="KairosFS" className="h-10 w-auto" />
         </Link>
 
         {/* Desktop Navigation */}

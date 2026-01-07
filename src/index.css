@@ -15,8 +15,8 @@
     --popover: 222 47% 8%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 187 100% 42%;
-    --primary-foreground: 222 47% 6%;
+    --primary: 5 91% 52%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 222 47% 12%;
     --secondary-foreground: 210 40% 98%;
@@ -24,36 +24,36 @@
     --muted: 222 30% 15%;
     --muted-foreground: 215 20% 55%;
 
-    --accent: 187 100% 42%;
-    --accent-foreground: 222 47% 6%;
+    --accent: 5 91% 52%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 222 30% 18%;
     --input: 222 30% 15%;
-    --ring: 187 100% 42%;
+    --ring: 5 91% 52%;
 
     --radius: 0.75rem;
 
-    /* Custom design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(187 100% 42%) 0%, hsl(200 100% 50%) 100%);
+    /* Custom design tokens - KairosFS Red theme */
+    --gradient-primary: linear-gradient(135deg, hsl(5 91% 52%) 0%, hsl(15 85% 58%) 100%);
     --gradient-dark: linear-gradient(180deg, hsl(222 47% 8%) 0%, hsl(222 47% 4%) 100%);
     --gradient-card: linear-gradient(145deg, hsl(222 47% 10%) 0%, hsl(222 47% 6%) 100%);
-    --glow-primary: 0 0 60px hsl(187 100% 42% / 0.3);
-    --glow-subtle: 0 0 40px hsl(187 100% 42% / 0.15);
+    --glow-primary: 0 0 60px hsl(5 91% 52% / 0.3);
+    --glow-subtle: 0 0 40px hsl(5 91% 52% / 0.15);
     
     --font-heading: 'Sora', sans-serif;
     --font-body: 'Inter', sans-serif;
 
     --sidebar-background: 222 47% 6%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 187 100% 42%;
-    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-primary: 5 91% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 47% 12%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 222 30% 18%;
-    --sidebar-ring: 187 100% 42%;
+    --sidebar-ring: 5 91% 52%;
   }
 
   .dark {
@@ -63,19 +63,19 @@
     --card-foreground: 210 40% 98%;
     --popover: 222 47% 8%;
     --popover-foreground: 210 40% 98%;
-    --primary: 187 100% 42%;
-    --primary-foreground: 222 47% 6%;
+    --primary: 5 91% 52%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 222 47% 12%;
     --secondary-foreground: 210 40% 98%;
     --muted: 222 30% 15%;
     --muted-foreground: 215 20% 55%;
-    --accent: 187 100% 42%;
-    --accent-foreground: 222 47% 6%;
+    --accent: 5 91% 52%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 210 40% 98%;
     --border: 222 30% 18%;
     --input: 222 30% 15%;
-    --ring: 187 100% 42%;
+    --ring: 5 91% 52%;
   }
 }
 
@@ -143,6 +143,26 @@
   .animate-fade-in {
     animation: fadeIn 0.8s ease-out forwards;
   }
+
+  .ai-grid-pattern {
+    background-image: 
+      linear-gradient(to right, hsl(5 91% 52% / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(5 91% 52% / 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .ai-dots-pattern {
+    background-image: radial-gradient(circle, hsl(5 91% 52% / 0.15) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  .animate-pulse-ring {
+    animation: pulseRing 2s ease-out infinite;
+  }
+
+  .animate-bounce-subtle {
+    animation: bounceSubtle 2s ease-in-out infinite;
+  }
 }
 
 @keyframes float {
@@ -169,6 +189,22 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes bounceSubtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 /* Scrollbar styling */
