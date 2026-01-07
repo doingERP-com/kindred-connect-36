@@ -10,7 +10,7 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>DOINGERP - Oracle Cloud HCM Consulting & ERP Solutions</title>
+        <title>KairosFS | Oracle Fusion HCM Cloud specialists</title>
         <meta
           name="description"
           content="Expert Oracle Cloud HCM consulting with AI-enhanced delivery. We reduce deployment risk, accelerate timelines, and drive measurable business outcomes."
