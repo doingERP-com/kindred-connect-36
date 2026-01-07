@@ -9,8 +9,8 @@ interface Message {
   content: string;
 }
 
-const AGENT_ID = "agent_ec9be380f089686b64dce6289a";
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lisa-chat`;
+const VOICE_AGENT_ID = "agent_ec9be380f089686b64dce6289a";
+const CHAT_AGENT_ID = "agent_6f30ae4f5cc7b915f7e11d08ce";
 
 export function FloatingAIWidget() {
   const [isCallActive, setIsCallActive] = useState(false);
@@ -20,6 +20,7 @@ export function FloatingAIWidget() {
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGlowing, setIsGlowing] = useState(false);
+  const [chatSessionId, setChatSessionId] = useState<string | null>(null);
   const retellClientRef = useRef<RetellWebClient | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -53,7 +54,7 @@ export function FloatingAIWidget() {
       await navigator.mediaDevices.getUserMedia({ audio: true });
 
       const { data, error } = await supabase.functions.invoke("retell-create-web-call", {
-        body: { agent_id: AGENT_ID },
+        body: { agent_id: VOICE_AGENT_ID },
       });
 
       if (error || !data?.access_token) {
@@ -136,6 +137,22 @@ export function FloatingAIWidget() {
     }
   };
 
+  // Initialize chat session if not exists
+  const initChatSession = async (): Promise<string> => {
+    if (chatSessionId) return chatSessionId;
+
+    const { data, error } = await supabase.functions.invoke("retell-chat", {
+      body: { action: "create_chat", agent_id: CHAT_AGENT_ID },
+    });
+
+    if (error || !data?.chat_id) {
+      throw new Error(error?.message || "Failed to create chat session");
+    }
+
+    setChatSessionId(data.chat_id);
+    return data.chat_id;
+  };
+
   const sendTextMessage = async () => {
     if (!inputText.trim() || isLoading) return;
 
@@ -144,64 +161,27 @@ export function FloatingAIWidget() {
     setInputText("");
     setIsLoading(true);
 
-    let assistantContent = "";
-
     try {
-      const resp = await fetch(CHAT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      const sessionId = await initChatSession();
+
+      const { data, error } = await supabase.functions.invoke("retell-chat", {
+        body: { 
+          action: "send_message", 
+          session_id: sessionId, 
+          message: userMessage.content 
         },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
       });
 
-      if (!resp.ok || !resp.body) {
-        throw new Error("Failed to get response");
+      if (error) {
+        throw new Error(error.message || "Failed to get response");
       }
 
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
+      const assistantMessage: Message = { 
+        role: "assistant", 
+        content: data.response || "I'm sorry, I couldn't generate a response." 
+      };
+      setMessages(prev => [...prev, assistantMessage]);
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex;
-        while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
-          let line = buffer.slice(0, newlineIndex);
-          buffer = buffer.slice(newlineIndex + 1);
-
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
-          if (!line.startsWith("data: ")) continue;
-
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") break;
-
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              assistantContent += content;
-              setMessages(prev => {
-                const last = prev[prev.length - 1];
-                if (last?.role === "assistant") {
-                  return prev.map((m, i) => 
-                    i === prev.length - 1 ? { ...m, content: assistantContent } : m
-                  );
-                }
-                return [...prev, { role: "assistant", content: assistantContent }];
-              });
-            }
-          } catch {
-            // Incomplete JSON, continue
-          }
-        }
-      }
     } catch (error) {
       console.error("Chat error:", error);
       toast({
@@ -209,6 +189,8 @@ export function FloatingAIWidget() {
         description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
+      // Reset session on error so it can retry
+      setChatSessionId(null);
     } finally {
       setIsLoading(false);
     }
@@ -221,6 +203,11 @@ export function FloatingAIWidget() {
     }
   };
 
+  const clearChat = () => {
+    setMessages([]);
+    setChatSessionId(null); // Reset chat session when clearing
+  };
+
   return (
     <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl transition-all duration-500 ${isGlowing ? 'scale-105' : ''}`}>
       {/* Messages Area */}
@@ -228,7 +215,7 @@ export function FloatingAIWidget() {
         <div className="mb-3 relative">
           {/* Close/Clear Chat Button */}
           <button
-            onClick={() => setMessages([])}
+            onClick={clearChat}
             className="absolute -top-2 right-2 w-6 h-6 rounded-full bg-secondary/80 hover:bg-destructive/80 flex items-center justify-center transition-colors z-10"
             title="Close chat"
           >
