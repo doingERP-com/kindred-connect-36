@@ -52,8 +52,8 @@ export function HeroSection() {
 
           {/* Heading */}
           <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight animate-fade-up">
-            Stop losing productivity to{" "}
-            <span className="gradient-text">technical friction</span>
+            What's stopping you from{" "}
+            <span className="gradient-text">doing more</span>
           </h1>
 
           {/* Meet Lisa */}
@@ -62,7 +62,7 @@ export function HeroSection() {
               Meet Lisa
             </h2>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Lisa is your 24/7 AI Agent that diagnoses complex ERP & HCM challenges and provides immediate expert intervention.
+              Lisa is your 24/7 AI Agent that diagnoses complex Marketing, Financial, Supply Chain, HCM process challenges and augments, assists you with immediate expert intervention.
             </p>
           </div>
 
