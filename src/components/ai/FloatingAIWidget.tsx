@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Mic, MicOff, Loader2, Send } from "lucide-react";
+import { Mic, MicOff, Loader2, Send, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { RetellWebClient } from "retell-client-js-sdk";
 import { supabase } from "@/integrations/supabase/client";
@@ -225,23 +225,34 @@ export function FloatingAIWidget() {
     <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl transition-all duration-500 ${isGlowing ? 'scale-105' : ''}`}>
       {/* Messages Area */}
       {messages.length > 0 && (
-        <div className="mb-3 max-h-60 overflow-y-auto space-y-2 px-4 scrollbar-thin">
-          {messages.map((m, i) => (
-            <div
-              key={i}
-              className={`text-sm p-3 rounded-lg ${
-                m.role === "assistant"
-                  ? "bg-card/80 text-foreground"
-                  : "bg-secondary/50 text-muted-foreground ml-8"
-              }`}
-            >
-              <span className="font-medium text-xs text-primary mr-2">
-                {m.role === "assistant" ? "Lisa:" : "You:"}
-              </span>
-              {m.content}
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
+        <div className="mb-3 relative">
+          {/* Close/Clear Chat Button */}
+          <button
+            onClick={() => setMessages([])}
+            className="absolute -top-2 right-2 w-6 h-6 rounded-full bg-secondary/80 hover:bg-destructive/80 flex items-center justify-center transition-colors z-10"
+            title="Close chat"
+          >
+            <X size={14} className="text-foreground" />
+          </button>
+          
+          <div className="max-h-60 overflow-y-auto space-y-2 px-4 scrollbar-thin">
+            {messages.map((m, i) => (
+              <div
+                key={i}
+                className={`text-sm p-3 rounded-lg ${
+                  m.role === "assistant"
+                    ? "bg-card/80 text-foreground"
+                    : "bg-secondary/50 text-muted-foreground ml-8"
+                }`}
+              >
+                <span className="font-medium text-xs text-primary mr-2">
+                  {m.role === "assistant" ? "Lisa:" : "You:"}
+                </span>
+                {m.content}
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
         </div>
       )}
 
