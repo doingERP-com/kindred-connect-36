@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
 import kairosLogo from "@/assets/kairosfs-logo.png";
 
 export function Footer() {
@@ -63,11 +63,18 @@ export function Footer() {
             <h4 className="font-heading font-semibold text-foreground">Contact</h4>
             <div className="space-y-3">
               <a
-                href="tel:+12345678900"
+                href="mailto:info@kairosfs.com"
+                className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors duration-300"
+              >
+                <Mail size={16} className="text-primary" />
+                info@kairosfs.com
+              </a>
+              <a
+                href="tel:+18447342790"
                 className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors duration-300"
               >
                 <Phone size={16} className="text-primary" />
-                +1 (234) 567-890
+                +1 844-734-2790
               </a>
               <p className="flex items-start gap-3 text-sm text-muted-foreground">
                 <MapPin size={16} className="text-primary mt-0.5" />
