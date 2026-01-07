@@ -1,12 +1,23 @@
-import { MessageCircle, ArrowRight } from "lucide-react";
+import { MessageCircle, ArrowDown, Sparkles } from "lucide-react";
 
 export function AIFeatureSection() {
+  const scrollToChat = () => {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  };
+
   return (
-    <section className="py-16 lg:py-24">
-      <div className="container mx-auto px-4">
+    <section className="py-16 lg:py-24 relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 ai-dots-pattern opacity-30" />
+      
+      <div className="container mx-auto px-4 relative">
         <div className="max-w-4xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-4">
+              <Sparkles size={14} className="text-primary" />
+              <span className="text-xs font-medium text-primary">Agentic AI Layer</span>
+            </div>
             <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
               Transform support from{" "}
               <span className="gradient-text">tickets to conversations</span>
@@ -30,19 +41,23 @@ export function AIFeatureSection() {
 
               {/* Content */}
               <div className="text-center lg:text-left space-y-4">
-                <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
-                  Agentic AI Layer
-                </div>
                 <h3 className="font-heading text-2xl lg:text-3xl font-bold text-foreground">
                   Lisa sits atop your HCM/ERP stack
                 </h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Lisa is an agentic layer that provides you with a voice interface that understands complex technical problems and takes immediate action. No more waiting, no more misrouted tickets.
                 </p>
-                <p className="text-primary text-sm font-medium flex items-center gap-2 justify-center lg:justify-start">
-                  Try Lisa now using the chat bar below
-                  <ArrowRight size={16} />
-                </p>
+                
+                {/* Visual CTA pointing to chat */}
+                <button 
+                  onClick={scrollToChat}
+                  className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-primary/10 border border-primary/30 hover:bg-primary/20 transition-all group"
+                >
+                  <span className="text-primary font-medium">Try Lisa now using the chat bar below</span>
+                  <div className="relative">
+                    <ArrowDown size={18} className="text-primary animate-bounce-subtle" />
+                  </div>
+                </button>
               </div>
             </div>
           </div>
