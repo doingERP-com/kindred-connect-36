@@ -238,6 +238,16 @@ export function FloatingAIWidget() {
                 {m.content}
               </div>
             ))}
+            {isLoading && (
+              <div className="text-sm p-3 rounded-lg bg-card/80 text-foreground">
+                <span className="font-medium text-xs text-primary mr-2">Lisa:</span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                </span>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
         </div>
