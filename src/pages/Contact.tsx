@@ -5,27 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Mail, Phone, MapPin, Send, Clock } from "lucide-react";
+import { Phone, MapPin, Send, Clock } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 const contactInfo = [
   {
-    icon: Mail,
-    title: "Email",
-    value: "info@doingerp.com",
-    link: "mailto:info@doingerp.com",
-  },
-  {
     icon: Phone,
     title: "Phone",
     value: "+1 (234) 567-890",
-    link: "tel:+1234567890",
+    link: "tel:+12345678906",
   },
   {
     icon: MapPin,
     title: "Address",
-    value: "123 Business Ave, Suite 500, San Francisco, CA 94102",
+    value: "8735 Dunwoody Place Ste 6, Atlanta, GA 30350",
   },
   {
     icon: Clock,
