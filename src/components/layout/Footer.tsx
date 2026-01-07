@@ -70,15 +70,15 @@ export function Footer() {
                 info@kairosfs.com
               </a>
               <a
-                href="tel:+18447342790"
+                href="tel:+12345678906"
                 className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors duration-300"
               >
                 <Phone size={16} className="text-primary" />
-                +1 844-734-2790
+                +1 (234) 567-890
               </a>
               <p className="flex items-start gap-3 text-sm text-muted-foreground">
                 <MapPin size={16} className="text-primary mt-0.5" />
-                123 Business Ave, Suite 500<br />San Francisco, CA 94102
+                8735 Dunwoody Place Ste 6<br />Atlanta, GA 30350
               </p>
             </div>
           </div>
