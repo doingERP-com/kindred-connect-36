@@ -229,7 +229,7 @@ export function FloatingAIWidget() {
                 className={`text-sm p-3 rounded-lg ${
                   m.role === "assistant"
                     ? "bg-card/80 text-foreground"
-                    : "bg-secondary/50 text-muted-foreground ml-8"
+                    : "bg-secondary text-muted-foreground ml-8"
                 }`}
               >
                 <span className="font-medium text-xs text-primary mr-2">
