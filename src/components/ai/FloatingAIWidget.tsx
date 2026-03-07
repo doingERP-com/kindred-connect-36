@@ -10,7 +10,7 @@ interface Message {
 }
 
 const VOICE_AGENT_ID = "agent_034266f5f5da7f771e6ce8a76d";
-const CHAT_AGENT_ID = "agent_9b02921f840f933ae439560caa";
+const CHAT_AGENT_ID = "agent_ada151b887299024f1e2bf8766";
 
 export function FloatingAIWidget() {
   const [isCallActive, setIsCallActive] = useState(false);
