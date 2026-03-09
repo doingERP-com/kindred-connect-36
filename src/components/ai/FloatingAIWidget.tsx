@@ -138,9 +138,9 @@ export function FloatingAIWidget() {
     }
   };
 
-  // Initialize chat session if not exists
-  const initChatSession = async (): Promise<string> => {
-    if (chatSessionId) return chatSessionId;
+  // Initialize chat session - uses ref to avoid stale closure issues
+  const initChatSession = async (forceNew = false): Promise<string> => {
+    if (!forceNew && chatSessionIdRef.current) return chatSessionIdRef.current;
 
     const { data, error } = await supabase.functions.invoke("retell-chat", {
       body: { action: "create_chat", agent_id: CHAT_AGENT_ID },
@@ -150,6 +150,7 @@ export function FloatingAIWidget() {
       throw new Error(error?.message || "Failed to create chat session");
     }
 
+    chatSessionIdRef.current = data.chat_id;
     setChatSessionId(data.chat_id);
     return data.chat_id;
   };
@@ -157,31 +158,36 @@ export function FloatingAIWidget() {
   const sendTextMessage = async () => {
     if (!inputText.trim() || isLoading) return;
 
-    const userMessage: Message = { role: "user", content: inputText.trim() };
+    const messageContent = inputText.trim();
+    const userMessage: Message = { role: "user", content: messageContent };
     setMessages(prev => [...prev, userMessage]);
     setInputText("");
     setIsLoading(true);
 
-    try {
-      const sessionId = await initChatSession();
-
+    const trySend = async (sessionId: string) => {
       const { data, error } = await supabase.functions.invoke("retell-chat", {
-        body: { 
-          action: "send_message", 
-          session_id: sessionId, 
-          message: userMessage.content 
-        },
+        body: { action: "send_message", session_id: sessionId, message: messageContent },
       });
+      if (error) throw new Error(error.message || "Failed to get response");
+      return data.response || "I'm sorry, I couldn't generate a response.";
+    };
 
-      if (error) {
-        throw new Error(error.message || "Failed to get response");
+    try {
+      let sessionId = await initChatSession();
+      let responseText: string;
+
+      try {
+        responseText = await trySend(sessionId);
+      } catch (firstError) {
+        // Session likely expired — auto-retry with a brand new session
+        console.warn("Chat session error, retrying with new session:", firstError);
+        chatSessionIdRef.current = null;
+        setChatSessionId(null);
+        sessionId = await initChatSession(true);
+        responseText = await trySend(sessionId);
       }
 
-      const assistantMessage: Message = { 
-        role: "assistant", 
-        content: data.response || "I'm sorry, I couldn't generate a response." 
-      };
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages(prev => [...prev, { role: "assistant", content: responseText }]);
 
     } catch (error) {
       console.error("Chat error:", error);
@@ -190,7 +196,7 @@ export function FloatingAIWidget() {
         description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
-      // Reset session on error so it can retry
+      chatSessionIdRef.current = null;
       setChatSessionId(null);
     } finally {
       setIsLoading(false);
