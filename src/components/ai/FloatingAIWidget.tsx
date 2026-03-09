@@ -10,6 +10,8 @@ interface Message {
 }
 
 const VOICE_AGENT_ID = "agent_034266f5f5da7f771e6ce8a76d";
+const DOCTOR_AI_AGENT_ID = "agent_a14a542d3a6ac9353e45338f3a";
+const CHAT_AGENT_ID = "agent_f4bca63c652a2e090a018923a4";
 
 export function FloatingAIWidget() {
   const [isCallActive, setIsCallActive] = useState(false);
@@ -20,6 +22,7 @@ export function FloatingAIWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGlowing, setIsGlowing] = useState(false);
   const retellClientRef = useRef<RetellWebClient | null>(null);
+  const chatSessionIdRef = useRef<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -46,13 +49,13 @@ export function FloatingAIWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const startCall = async () => {
+  const startCall = async (agentId: string = VOICE_AGENT_ID) => {
     setIsConnecting(true);
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
 
       const { data, error } = await supabase.functions.invoke("retell-create-web-call", {
-        body: { agent_id: VOICE_AGENT_ID },
+        body: { agent_id: agentId },
       });
 
       if (error || !data?.access_token) {
@@ -63,7 +66,7 @@ export function FloatingAIWidget() {
       retellClientRef.current = retellWebClient;
 
       retellWebClient.on("call_started", () => {
-        console.log("Call started");
+        console.log("Call started with agent:", agentId);
         setIsCallActive(true);
         setIsConnecting(false);
       });
@@ -96,7 +99,7 @@ export function FloatingAIWidget() {
         console.error("Retell error:", error);
         toast({
           title: "Connection Error",
-          description: "Failed to connect to Lisa. Please try again.",
+          description: "Failed to connect. Please try again.",
           variant: "destructive",
         });
         setIsCallActive(false);
@@ -135,65 +138,67 @@ export function FloatingAIWidget() {
     }
   };
 
-  // Text chat via lisa-chat (Gemini) — fetch directly to handle SSE streaming
+  // Switch to Doctor AI: disconnect current voice agent and connect to Doctor AI agent
+  const switchToDoctorAI = async () => {
+    // Stop current voice call if active
+    stopCall();
+    // Add a system-like message
+    setMessages(prev => [...prev, {
+      role: "assistant",
+      content: "Connecting you to Doctor AI... Please wait.",
+    }]);
+    // Start a new voice call with Doctor AI agent
+    await startCall(DOCTOR_AI_AGENT_ID);
+  };
+
+  // Text chat via retell-chat edge function
   const sendTextMessage = async () => {
     if (!inputText.trim() || isLoading) return;
 
     const messageContent = inputText.trim();
+
+    // Check for "doctor ai" trigger
+    if (messageContent.toLowerCase().includes("doctor ai")) {
+      const userMessage: Message = { role: "user", content: messageContent };
+      setMessages(prev => [...prev, userMessage]);
+      setInputText("");
+      await switchToDoctorAI();
+      return;
+    }
+
     const userMessage: Message = { role: "user", content: messageContent };
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
+    setMessages(prev => [...prev, userMessage]);
     setInputText("");
     setIsLoading(true);
 
     try {
-      const chatHistory = updatedMessages.map(m => ({
-        role: m.role === "assistant" ? "assistant" : "user",
-        content: m.content,
-      }));
+      // Create chat session if we don't have one
+      if (!chatSessionIdRef.current) {
+        const { data: chatData, error: chatError } = await supabase.functions.invoke("retell-chat", {
+          body: { action: "create_chat", agent_id: CHAT_AGENT_ID },
+        });
 
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        if (chatError || !chatData?.chat_id) {
+          throw new Error(chatError?.message || "Failed to create chat session");
+        }
+        chatSessionIdRef.current = chatData.chat_id;
+      }
 
-      const response = await fetch(`${supabaseUrl}/functions/v1/lisa-chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": supabaseKey,
-          "Authorization": `Bearer ${supabaseKey}`,
+      // Send message
+      const { data, error } = await supabase.functions.invoke("retell-chat", {
+        body: {
+          action: "send_message",
+          session_id: chatSessionIdRef.current,
+          message: messageContent,
         },
-        body: JSON.stringify({ messages: chatHistory }),
       });
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      if (!response.body) throw new Error("No response body");
-
-      // Parse SSE stream directly
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          const json = line.slice(6).trim();
-          if (json === "[DONE]") break;
-          try {
-            const parsed = JSON.parse(json);
-            fullResponse += parsed.choices?.[0]?.delta?.content || "";
-          } catch { /* skip malformed chunks */ }
-        }
-      }
+      if (error) throw new Error(error.message);
 
       setMessages(prev => [...prev, {
         role: "assistant",
-        content: fullResponse || "I'm sorry, I couldn't generate a response.",
+        content: data?.response || "I'm sorry, I couldn't generate a response.",
       }]);
-
     } catch (error) {
       console.error("Chat error:", error);
       toast({
@@ -215,6 +220,7 @@ export function FloatingAIWidget() {
 
   const clearChat = () => {
     setMessages([]);
+    chatSessionIdRef.current = null;
   };
 
   return (
@@ -222,7 +228,6 @@ export function FloatingAIWidget() {
       {/* Messages Area */}
       {messages.length > 0 && (
         <div className="mb-3 relative">
-          {/* Close/Clear Chat Button */}
           <button
             onClick={clearChat}
             className="absolute -top-2 right-2 w-6 h-6 rounded-full bg-secondary/80 hover:bg-destructive/80 flex items-center justify-center transition-colors z-10"
@@ -284,7 +289,6 @@ export function FloatingAIWidget() {
             disabled={isLoading}
           />
           
-          {/* Send Button */}
           {inputText.trim() && (
             <button
               onClick={sendTextMessage}
@@ -299,7 +303,6 @@ export function FloatingAIWidget() {
             </button>
           )}
           
-          {/* Mic Button */}
           <button
             onClick={handleToggleCall}
             disabled={isConnecting || isLoading}
@@ -322,7 +325,6 @@ export function FloatingAIWidget() {
         </div>
       </div>
 
-      {/* Helper Text */}
       <p className="text-center text-muted-foreground text-sm mt-4">
         {isCallActive
           ? isSpeaking
