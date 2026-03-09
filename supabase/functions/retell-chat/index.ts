@@ -74,14 +74,24 @@ serve(async (req) => {
       }
 
       const data = await response.json();
-      console.log("Chat response received");
+      console.log("Chat response received:", JSON.stringify(data));
 
-      // Extract the latest agent message
+      // Extract the latest agent message - check both current response and full history
       const messages = data.messages || [];
-      const lastAgentMessage = messages.filter((m: { role: string }) => m.role === "agent").pop();
+      
+      // Filter only real content messages (exclude node_transition, etc.)
+      const agentMessages = messages.filter(
+        (m: { role: string; content?: string }) => m.role === "agent" && m.content
+      );
+      const lastAgentMessage = agentMessages[agentMessages.length - 1];
+
+      // Also check top-level response field that Retell sometimes returns
+      const responseText = data.response || lastAgentMessage?.content || null;
+
+      console.log("Agent messages found:", agentMessages.length, "Response:", responseText);
 
       return new Response(JSON.stringify({ 
-        response: lastAgentMessage?.content || "I'm sorry, I couldn't generate a response.",
+        response: responseText || "I'm sorry, I couldn't generate a response.",
         messages: messages
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
