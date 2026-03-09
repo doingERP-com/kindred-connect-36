@@ -137,56 +137,57 @@ export function FloatingAIWidget() {
     }
   };
 
-  // Initialize chat session - uses ref to avoid stale closure issues
-  const initChatSession = async (forceNew = false): Promise<string> => {
-    if (!forceNew && chatSessionIdRef.current) return chatSessionIdRef.current;
-
-    const { data, error } = await supabase.functions.invoke("retell-chat", {
-      body: { action: "create_chat", agent_id: CHAT_AGENT_ID },
-    });
-
-    if (error || !data?.chat_id) {
-      throw new Error(error?.message || "Failed to create chat session");
-    }
-
-    chatSessionIdRef.current = data.chat_id;
-    setChatSessionId(data.chat_id);
-    return data.chat_id;
-  };
-
+  // Text chat via lisa-chat (Gemini) — no sessions needed, just pass full history
   const sendTextMessage = async () => {
     if (!inputText.trim() || isLoading) return;
 
     const messageContent = inputText.trim();
     const userMessage: Message = { role: "user", content: messageContent };
-    setMessages(prev => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setInputText("");
     setIsLoading(true);
 
-    const trySend = async (sessionId: string) => {
-      const { data, error } = await supabase.functions.invoke("retell-chat", {
-        body: { action: "send_message", session_id: sessionId, message: messageContent },
-      });
-      if (error) throw new Error(error.message || "Failed to get response");
-      return data.response || "I'm sorry, I couldn't generate a response.";
-    };
-
     try {
-      let sessionId = await initChatSession();
-      let responseText: string;
+      // Build the message history for Gemini (only user/assistant messages)
+      const chatHistory = updatedMessages.map(m => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: m.content,
+      }));
 
-      try {
-        responseText = await trySend(sessionId);
-      } catch (firstError) {
-        // Session likely expired — auto-retry with a brand new session
-        console.warn("Chat session error, retrying with new session:", firstError);
-        chatSessionIdRef.current = null;
-        setChatSessionId(null);
-        sessionId = await initChatSession(true);
-        responseText = await trySend(sessionId);
+      const { data, error } = await supabase.functions.invoke("lisa-chat", {
+        body: { messages: chatHistory },
+      });
+
+      if (error) throw new Error(error.message || "Failed to get response");
+
+      // lisa-chat streams SSE — parse the streamed chunks
+      let fullResponse = "";
+      if (data instanceof ReadableStream) {
+        const reader = data.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n").filter(l => l.startsWith("data: "));
+          for (const line of lines) {
+            const json = line.replace("data: ", "").trim();
+            if (json === "[DONE]") break;
+            try {
+              const parsed = JSON.parse(json);
+              fullResponse += parsed.choices?.[0]?.delta?.content || "";
+            } catch { /* skip malformed chunks */ }
+          }
+        }
+      } else if (typeof data === "string") {
+        fullResponse = data;
       }
 
-      setMessages(prev => [...prev, { role: "assistant", content: responseText }]);
+      setMessages(prev => [...prev, {
+        role: "assistant",
+        content: fullResponse || "I'm sorry, I couldn't generate a response.",
+      }]);
 
     } catch (error) {
       console.error("Chat error:", error);
@@ -195,8 +196,6 @@ export function FloatingAIWidget() {
         description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
-      chatSessionIdRef.current = null;
-      setChatSessionId(null);
     } finally {
       setIsLoading(false);
     }
