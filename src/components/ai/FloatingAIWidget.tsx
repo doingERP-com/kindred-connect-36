@@ -138,17 +138,34 @@ export function FloatingAIWidget() {
     }
   };
 
-  // Switch to Doctor AI: disconnect current voice agent and connect to Doctor AI agent
+  // Switch to Doctor AI: disconnect current voice agent and start a chat session with Doctor AI
   const switchToDoctorAI = async () => {
     // Stop current voice call if active
     stopCall();
-    // Add a system-like message
+    // Reset chat session so a new one is created with Doctor AI agent
+    chatSessionIdRef.current = null;
     setMessages(prev => [...prev, {
       role: "assistant",
-      content: "Connecting you to Doctor AI... Please wait.",
+      content: "Connecting you to Doctor AI... You can now chat with Doctor AI.",
     }]);
-    // Start a new voice call with Doctor AI agent
-    await startCall(DOCTOR_AI_AGENT_ID);
+
+    // Create a new chat session with Doctor AI agent
+    try {
+      const { data: chatData, error: chatError } = await supabase.functions.invoke("retell-chat", {
+        body: { action: "create_chat", agent_id: DOCTOR_AI_AGENT_ID },
+      });
+      if (chatError || !chatData?.chat_id) {
+        throw new Error(chatError?.message || "Failed to create Doctor AI chat session");
+      }
+      chatSessionIdRef.current = chatData.chat_id;
+    } catch (error) {
+      console.error("Failed to connect to Doctor AI:", error);
+      toast({
+        title: "Error",
+        description: "Failed to connect to Doctor AI. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Text chat via retell-chat edge function
