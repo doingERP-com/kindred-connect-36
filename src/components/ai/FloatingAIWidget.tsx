@@ -208,8 +208,6 @@ export function FloatingAIWidget() {
 
   const clearChat = () => {
     setMessages([]);
-    setChatSessionId(null);
-    chatSessionIdRef.current = null;
   };
 
   return (
