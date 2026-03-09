@@ -281,11 +281,11 @@ export function FloatingAIWidget() {
             onKeyDown={handleKeyDown}
             placeholder="Ask Lisa about ERP issues, Oracle Cloud HCM, or implementations..."
             className="flex-1 py-4 px-6 bg-transparent text-foreground placeholder:text-muted-foreground text-base outline-none"
-            disabled={isLoading || isCallActive}
+            disabled={isLoading}
           />
           
           {/* Send Button */}
-          {inputText.trim() && !isCallActive && (
+          {inputText.trim() && (
             <button
               onClick={sendTextMessage}
               disabled={isLoading}
