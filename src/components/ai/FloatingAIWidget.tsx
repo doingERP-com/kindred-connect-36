@@ -135,7 +135,7 @@ export function FloatingAIWidget() {
     }
   };
 
-  // Text chat via lisa-chat (Gemini) — no sessions needed, just pass full history
+  // Text chat via lisa-chat (Gemini) — fetch directly to handle SSE streaming
   const sendTextMessage = async () => {
     if (!inputText.trim() || isLoading) return;
 
@@ -147,39 +147,46 @@ export function FloatingAIWidget() {
     setIsLoading(true);
 
     try {
-      // Build the message history for Gemini (only user/assistant messages)
       const chatHistory = updatedMessages.map(m => ({
         role: m.role === "assistant" ? "assistant" : "user",
         content: m.content,
       }));
 
-      const { data, error } = await supabase.functions.invoke("lisa-chat", {
-        body: { messages: chatHistory },
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/lisa-chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": supabaseKey,
+          "Authorization": `Bearer ${supabaseKey}`,
+        },
+        body: JSON.stringify({ messages: chatHistory }),
       });
 
-      if (error) throw new Error(error.message || "Failed to get response");
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.body) throw new Error("No response body");
 
-      // lisa-chat streams SSE — parse the streamed chunks
+      // Parse SSE stream directly
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
       let fullResponse = "";
-      if (data instanceof ReadableStream) {
-        const reader = data.getReader();
-        const decoder = new TextDecoder();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n").filter(l => l.startsWith("data: "));
-          for (const line of lines) {
-            const json = line.replace("data: ", "").trim();
-            if (json === "[DONE]") break;
-            try {
-              const parsed = JSON.parse(json);
-              fullResponse += parsed.choices?.[0]?.delta?.content || "";
-            } catch { /* skip malformed chunks */ }
-          }
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const json = line.slice(6).trim();
+          if (json === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(json);
+            fullResponse += parsed.choices?.[0]?.delta?.content || "";
+          } catch { /* skip malformed chunks */ }
         }
-      } else if (typeof data === "string") {
-        fullResponse = data;
       }
 
       setMessages(prev => [...prev, {
