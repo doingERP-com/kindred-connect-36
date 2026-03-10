@@ -51,9 +51,7 @@ export const ConsultantTable = ({ consultants }: ConsultantTableProps) => {
                     </div>
                     <div>
                       <p className="font-medium text-foreground">{fullName}</p>
-                      {consultant.email && (
-                        <p className="text-xs text-muted-foreground">{consultant.email}</p>
-                      )}
+                     
                     </div>
                   </div>
                 </TableCell>
