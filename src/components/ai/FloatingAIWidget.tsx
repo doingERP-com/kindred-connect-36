@@ -253,26 +253,34 @@ export function FloatingAIWidget() {
 
   return (
     <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl transition-all duration-500 ${isGlowing ? 'scale-105' : ''}`}>
-      {/* Messages Area */}
+      {/* Chat Panel */}
       {messages.length > 0 && (
-        <div className="mb-3 relative">
+        <div
+          className="mb-3 relative rounded-2xl border border-border overflow-hidden"
+          style={{ background: 'hsl(222 47% 7%)' }}
+        >
           <button
             onClick={clearChat}
-            className="absolute -top-2 right-2 w-6 h-6 rounded-full bg-secondary/80 hover:bg-destructive/80 flex items-center justify-center transition-colors z-10"
+            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-secondary hover:bg-destructive flex items-center justify-center transition-colors z-10"
             title="Close chat"
           >
             <X size={14} className="text-foreground" />
           </button>
-          
-          <div className="max-h-60 overflow-y-auto space-y-2 px-4 scrollbar-thin">
+
+          <div className="max-h-[22rem] overflow-y-auto space-y-2 p-4 scrollbar-thin">
             {messages.map((m, i) => (
               <div
                 key={i}
                 className={`text-sm p-3 rounded-lg ${
                   m.role === "assistant"
-                    ? "bg-card/80 text-foreground"
-                    : "bg-secondary text-muted-foreground ml-8"
+                    ? "text-foreground"
+                    : "ml-8 text-muted-foreground"
                 }`}
+                style={{
+                  background: m.role === "assistant"
+                    ? 'hsl(222 47% 11%)'
+                    : 'hsl(222 47% 14%)',
+                }}
               >
                 <span className="font-medium text-xs text-primary mr-2">
                   {m.role === "assistant" ? "Lisa:" : "You:"}
@@ -281,7 +289,10 @@ export function FloatingAIWidget() {
               </div>
             ))}
             {isLoading && (
-              <div className="text-sm p-3 rounded-lg bg-card/80 text-foreground">
+              <div
+                className="text-sm p-3 rounded-lg text-foreground"
+                style={{ background: 'hsl(222 47% 11%)' }}
+              >
                 <span className="font-medium text-xs text-primary mr-2">Lisa:</span>
                 <span className="inline-flex items-center gap-1">
                   <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -297,15 +308,13 @@ export function FloatingAIWidget() {
 
       {/* Main Input Bar */}
       <div className="relative flex items-center">
-        <div 
-          className={`flex-1 bg-card/80 backdrop-blur-sm border rounded-full flex items-center pr-2 transition-all duration-500 ${
-            isGlowing 
-              ? 'border-primary shadow-[0_0_40px_hsl(5_91%_52%/0.5),0_0_80px_hsl(5_91%_52%/0.3)] animate-pulse' 
-              : 'border-border/30'
+        <div
+          className={`flex-1 border rounded-full flex items-center pr-2 transition-all duration-500 ${
+            isGlowing
+              ? 'border-primary shadow-[0_0_40px_hsl(5_91%_52%/0.5),0_0_80px_hsl(5_91%_52%/0.3)] animate-pulse'
+              : 'border-border'
           }`}
-          style={{ 
-            background: 'linear-gradient(145deg, hsl(222 47% 12% / 0.9) 0%, hsl(222 47% 8% / 0.95) 100%)'
-          }}
+          style={{ background: 'hsl(222 47% 10%)' }}
         >
           <input
             type="text"
@@ -316,12 +325,12 @@ export function FloatingAIWidget() {
             className="flex-1 py-4 px-6 bg-transparent text-foreground placeholder:text-muted-foreground text-base outline-none"
             disabled={isLoading}
           />
-          
+
           {inputText.trim() && (
             <button
               onClick={sendTextMessage}
               disabled={isLoading}
-              className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary/50 hover:bg-secondary transition-colors mr-2"
+              className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary hover:bg-secondary/80 transition-colors mr-2"
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 text-primary animate-spin" />
@@ -330,7 +339,7 @@ export function FloatingAIWidget() {
               )}
             </button>
           )}
-          
+
           <button
             onClick={handleToggleCall}
             disabled={isConnecting || isLoading}
