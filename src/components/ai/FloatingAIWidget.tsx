@@ -251,6 +251,38 @@ export function FloatingAIWidget() {
     chatSessionIdRef.current = null;
   };
 
+  const sendSuggestion = async (text: string) => {
+    if (isLoading) return;
+    const userMessage: Message = { role: "user", content: text };
+    setMessages(prev => [...prev, userMessage]);
+    setIsLoading(true);
+    try {
+      if (!chatSessionIdRef.current) {
+        const { data: chatData, error: chatError } = await supabase.functions.invoke("retell-chat", {
+          body: { action: "create_chat", agent_id: CHAT_AGENT_ID },
+        });
+        if (chatError || !chatData?.chat_id) throw new Error(chatError?.message || "Failed to create chat session");
+        chatSessionIdRef.current = chatData.chat_id;
+      }
+      const { data, error } = await supabase.functions.invoke("retell-chat", {
+        body: { action: "send_message", session_id: chatSessionIdRef.current, message: text },
+      });
+      if (error) throw new Error(error.message);
+      setMessages(prev => [...prev, { role: "assistant", content: data?.response || "I'm sorry, I couldn't generate a response." }]);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to send message. Please try again.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const SUGGESTIONS = [
+    "Setup meeting with DoingERP staff",
+    "Setup interviews",
+    "Screen candidates",
+    "Staff mode",
+  ];
+
   return (
     <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl transition-all duration-500 ${isGlowing ? 'scale-105' : ''}`}>
       {/* Chat Panel */}
@@ -303,6 +335,23 @@ export function FloatingAIWidget() {
             )}
             <div ref={messagesEndRef} />
           </div>
+        </div>
+      )}
+
+      {/* Suggestion Chips */}
+      {messages.length === 0 && !isCallActive && (
+        <div className="flex flex-wrap gap-2 mb-3 justify-center">
+          {SUGGESTIONS.map((s) => (
+            <button
+              key={s}
+              onClick={() => sendSuggestion(s)}
+              disabled={isLoading}
+              className="px-4 py-2 rounded-full text-sm border border-border text-muted-foreground hover:text-foreground hover:border-primary/60 transition-all duration-200"
+              style={{ background: 'hsl(222 47% 10%)' }}
+            >
+              {s}
+            </button>
+          ))}
         </div>
       )}
 
