@@ -251,6 +251,21 @@ export function FloatingAIWidget() {
     chatSessionIdRef.current = null;
   };
 
+  const sendSuggestion = (text: string) => {
+    setInputText(text);
+    setTimeout(() => {
+      const syntheticEvent = { target: { value: text } } as React.ChangeEvent<HTMLInputElement>;
+      setInputText(text);
+    }, 0);
+  };
+
+  const SUGGESTIONS = [
+    "Setup meeting with DoingERP staff",
+    "Setup interviews",
+    "Screen candidates",
+    "Staff mode",
+  ];
+
   return (
     <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl transition-all duration-500 ${isGlowing ? 'scale-105' : ''}`}>
       {/* Chat Panel */}
