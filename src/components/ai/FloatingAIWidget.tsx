@@ -321,6 +321,23 @@ export function FloatingAIWidget() {
         </div>
       )}
 
+      {/* Suggestion Chips */}
+      {messages.length === 0 && !isCallActive && (
+        <div className="flex flex-wrap gap-2 mb-3 justify-center">
+          {SUGGESTIONS.map((s) => (
+            <button
+              key={s}
+              onClick={() => sendSuggestion(s)}
+              disabled={isLoading}
+              className="px-4 py-2 rounded-full text-sm border border-border text-muted-foreground hover:text-foreground hover:border-primary/60 transition-all duration-200"
+              style={{ background: 'hsl(222 47% 10%)' }}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Main Input Bar */}
       <div className="relative flex items-center">
         <div
