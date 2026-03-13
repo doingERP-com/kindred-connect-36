@@ -251,12 +251,29 @@ export function FloatingAIWidget() {
     chatSessionIdRef.current = null;
   };
 
-  const sendSuggestion = (text: string) => {
-    setInputText(text);
-    setTimeout(() => {
-      const syntheticEvent = { target: { value: text } } as React.ChangeEvent<HTMLInputElement>;
-      setInputText(text);
-    }, 0);
+  const sendSuggestion = async (text: string) => {
+    if (isLoading) return;
+    const userMessage: Message = { role: "user", content: text };
+    setMessages(prev => [...prev, userMessage]);
+    setIsLoading(true);
+    try {
+      if (!chatSessionIdRef.current) {
+        const { data: chatData, error: chatError } = await supabase.functions.invoke("retell-chat", {
+          body: { action: "create_chat", agent_id: CHAT_AGENT_ID },
+        });
+        if (chatError || !chatData?.chat_id) throw new Error(chatError?.message || "Failed to create chat session");
+        chatSessionIdRef.current = chatData.chat_id;
+      }
+      const { data, error } = await supabase.functions.invoke("retell-chat", {
+        body: { action: "send_message", session_id: chatSessionIdRef.current, message: text },
+      });
+      if (error) throw new Error(error.message);
+      setMessages(prev => [...prev, { role: "assistant", content: data?.response || "I'm sorry, I couldn't generate a response." }]);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to send message. Please try again.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const SUGGESTIONS = [
