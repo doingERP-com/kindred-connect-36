@@ -281,6 +281,7 @@ export function FloatingAIWidget() {
     "Setup interviews",
     "Screen candidates",
     "Staff mode",
+    "Something Else",
   ];
 
   return (
@@ -356,58 +357,60 @@ export function FloatingAIWidget() {
       )}
 
       {/* Main Input Bar */}
-      <div className="relative flex items-center">
+      <div className="relative flex items-end">
         <div
-          className={`flex-1 border rounded-full flex items-center pr-2 transition-all duration-500 ${
+          className={`flex-1 border rounded-2xl flex items-end pr-2 pb-2 transition-all duration-500 ${
             isGlowing
               ? 'border-primary shadow-[0_0_40px_hsl(5_91%_52%/0.5),0_0_80px_hsl(5_91%_52%/0.3)] animate-pulse'
               : 'border-border'
           }`}
           style={{ background: 'hsl(222 47% 10%)' }}
         >
-          <input
-            type="text"
+          <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask Lisa about ERP issues, Oracle Cloud HCM, or implementations..."
-            className="flex-1 py-4 px-6 bg-transparent text-foreground placeholder:text-muted-foreground text-base outline-none"
+            rows={3}
+            className="flex-1 py-4 px-6 bg-transparent text-foreground placeholder:text-muted-foreground text-base outline-none resize-none"
             disabled={isLoading}
           />
 
-          {inputText.trim() && (
+          <div className="flex items-center gap-1 mb-1">
+            {inputText.trim() && (
+              <button
+                onClick={sendTextMessage}
+                disabled={isLoading}
+                className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary hover:bg-secondary/80 transition-colors"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5 text-primary" />
+                )}
+              </button>
+            )}
+
             <button
-              onClick={sendTextMessage}
-              disabled={isLoading}
-              className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary hover:bg-secondary/80 transition-colors mr-2"
+              onClick={handleToggleCall}
+              disabled={isConnecting || isLoading}
+              className={`w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 ${
+                isCallActive
+                  ? isSpeaking
+                    ? "bg-primary animate-pulse shadow-[0_0_30px_hsl(187_100%_42%/0.5)]"
+                    : "bg-primary shadow-[0_0_20px_hsl(187_100%_42%/0.4)]"
+                  : "bg-primary hover:scale-105 hover:shadow-[0_0_25px_hsl(187_100%_42%/0.4)]"
+              }`}
             >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 text-primary animate-spin" />
+              {isConnecting ? (
+                <Loader2 className="w-6 h-6 text-primary-foreground animate-spin" />
+              ) : isCallActive ? (
+                <MicOff className="w-6 h-6 text-primary-foreground" />
               ) : (
-                <Send className="w-5 h-5 text-primary" />
+                <Mic className="w-6 h-6 text-primary-foreground" />
               )}
             </button>
-          )}
-
-          <button
-            onClick={handleToggleCall}
-            disabled={isConnecting || isLoading}
-            className={`w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 ${
-              isCallActive
-                ? isSpeaking
-                  ? "bg-primary animate-pulse shadow-[0_0_30px_hsl(187_100%_42%/0.5)]"
-                  : "bg-primary shadow-[0_0_20px_hsl(187_100%_42%/0.4)]"
-                : "bg-primary hover:scale-105 hover:shadow-[0_0_25px_hsl(187_100%_42%/0.4)]"
-            }`}
-          >
-            {isConnecting ? (
-              <Loader2 className="w-6 h-6 text-primary-foreground animate-spin" />
-            ) : isCallActive ? (
-              <MicOff className="w-6 h-6 text-primary-foreground" />
-            ) : (
-              <Mic className="w-6 h-6 text-primary-foreground" />
-            )}
-          </button>
+          </div>
         </div>
       </div>
 
