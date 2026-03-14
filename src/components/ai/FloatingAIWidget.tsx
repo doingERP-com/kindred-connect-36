@@ -341,13 +341,13 @@ export function FloatingAIWidget() {
 
       {/* Suggestion Chips */}
       {messages.length === 0 && !isCallActive && (
-        <div className="flex flex-wrap gap-2 mb-3 justify-center">
+        <div className="flex gap-1.5 mb-3 overflow-x-auto no-scrollbar">
           {SUGGESTIONS.map((s) => (
             <button
               key={s}
               onClick={() => sendSuggestion(s)}
               disabled={isLoading}
-              className="px-4 py-2 rounded-full text-sm border border-border text-muted-foreground hover:text-foreground hover:border-primary/60 transition-all duration-200"
+              className="flex-shrink-0 px-3 py-1 rounded-full text-xs border border-border text-muted-foreground hover:text-foreground hover:border-primary/60 transition-all duration-200 whitespace-nowrap"
               style={{ background: 'hsl(222 47% 10%)' }}
             >
               {s}
