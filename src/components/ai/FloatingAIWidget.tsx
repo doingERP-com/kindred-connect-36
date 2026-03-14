@@ -281,6 +281,7 @@ export function FloatingAIWidget() {
     "Setup interviews",
     "Screen candidates",
     "Staff mode",
+    "Something Else",
   ];
 
   return (
