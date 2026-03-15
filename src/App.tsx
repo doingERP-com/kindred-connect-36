@@ -10,6 +10,7 @@ import Consultants from "./pages/Consultants";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import { FloatingAIWidget } from "@/components/ai/FloatingAIWidget";
+import { MagicCursor } from "@/components/ui/MagicCursor";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <FloatingAIWidget />
+          <MagicCursor />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
