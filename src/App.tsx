@@ -29,6 +29,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <FloatingAIWidget />
+          <MagicCursor />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
