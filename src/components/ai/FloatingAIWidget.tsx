@@ -349,23 +349,6 @@ export function FloatingAIWidget() {
           }`}
           style={{ background: 'hsl(222 47% 10%)' }}
         >
-          {/* Suggestion Chips — inside the box, above the textarea */}
-          {messages.length === 0 && !isCallActive && (
-            <div className="flex gap-1.5 px-4 pt-3 pb-2 overflow-x-auto no-scrollbar border-b border-border/40">
-              {SUGGESTIONS.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => sendSuggestion(s)}
-                  disabled={isLoading}
-                  className="flex-shrink-0 px-3 py-1 rounded-full text-xs border border-border text-muted-foreground hover:text-foreground hover:border-primary/60 transition-all duration-200 whitespace-nowrap"
-                  style={{ background: 'hsl(222 47% 13%)' }}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
-
           <div className="flex items-end pr-2 pb-2">
             <textarea
               value={inputText}
@@ -413,6 +396,23 @@ export function FloatingAIWidget() {
               </button>
             </div>
           </div>
+
+          {/* Suggestion Chips — inside the box, below the textarea */}
+          {messages.length === 0 && !isCallActive && (
+            <div className="flex gap-1.5 px-4 pb-3 pt-1 overflow-x-auto no-scrollbar border-t border-border/40">
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => sendSuggestion(s)}
+                  disabled={isLoading}
+                  className="flex-shrink-0 px-3 py-1 rounded-full text-xs border border-border text-muted-foreground hover:text-foreground hover:border-primary/60 transition-all duration-200 whitespace-nowrap"
+                  style={{ background: 'hsl(222 47% 13%)' }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
