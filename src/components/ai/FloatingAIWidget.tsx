@@ -341,7 +341,7 @@ export function FloatingAIWidget() {
 
       {/* Suggestion Chips */}
       {messages.length === 0 && !isCallActive && (
-        <div className="flex gap-1.5 mb-3 overflow-x-auto no-scrollbar">
+        <div className="flex gap-1.5 mb-2 overflow-x-auto no-scrollbar pb-1">
           {SUGGESTIONS.map((s) => (
             <button
               key={s}
