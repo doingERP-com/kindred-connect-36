@@ -359,13 +359,31 @@ export function FloatingAIWidget() {
       {/* Main Input Bar */}
       <div className="relative flex items-end">
         <div
-          className={`flex-1 border rounded-2xl flex items-end pr-2 pb-2 transition-all duration-500 ${
+          className={`flex-1 border rounded-2xl flex flex-col pr-2 pb-2 transition-all duration-500 ${
             isGlowing
               ? 'border-primary shadow-[0_0_40px_hsl(5_91%_52%/0.5),0_0_80px_hsl(5_91%_52%/0.3)] animate-pulse'
               : 'border-border'
           }`}
           style={{ background: 'hsl(222 47% 10%)' }}
         >
+          {/* Suggestion Chips — inside the box, above the textarea */}
+          {messages.length === 0 && !isCallActive && (
+            <div className="flex gap-1.5 px-4 pt-3 pb-2 overflow-x-auto no-scrollbar border-b border-border/40">
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => sendSuggestion(s)}
+                  disabled={isLoading}
+                  className="flex-shrink-0 px-3 py-1 rounded-full text-xs border border-border text-muted-foreground hover:text-foreground hover:border-primary/60 transition-all duration-200 whitespace-nowrap"
+                  style={{ background: 'hsl(222 47% 13%)' }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-end">
           <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
