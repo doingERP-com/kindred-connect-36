@@ -9,7 +9,7 @@ interface Particle {
   createdAt: number;
 }
 
-export function MagicCursor() {
+function MagicCursorInner() {
   const [pos, setPos] = useState({ x: -100, y: -100 });
   const [trail, setTrail] = useState<Particle[]>([]);
   const [isHovering, setIsHovering] = useState(false);
@@ -22,7 +22,6 @@ export function MagicCursor() {
       const y = e.clientY;
       setPos({ x, y });
 
-      // Add particle
       counterRef.current += 1;
       const id = counterRef.current;
       setTrail(prev => [
@@ -50,7 +49,6 @@ export function MagicCursor() {
     };
   }, []);
 
-  // Fade out old particles
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
@@ -61,10 +59,8 @@ export function MagicCursor() {
 
   return (
     <>
-      {/* Hide default cursor globally */}
       <style>{`* { cursor: none !important; }`}</style>
 
-      {/* Trail particles */}
       {trail.map((p, i) => {
         const age = (Date.now() - p.createdAt) / 600;
         const opacity = Math.max(0, 1 - age) * (i / trail.length) * 0.8;
@@ -87,7 +83,6 @@ export function MagicCursor() {
         );
       })}
 
-      {/* Outer ring */}
       <div
         className="pointer-events-none fixed z-[9999]"
         style={{
@@ -103,7 +98,6 @@ export function MagicCursor() {
         }}
       />
 
-      {/* Inner dot */}
       <div
         className="pointer-events-none fixed z-[9999]"
         style={{
@@ -120,4 +114,14 @@ export function MagicCursor() {
       />
     </>
   );
+}
+
+// Only render on devices with a real mouse pointer (not touch-only)
+export function MagicCursor() {
+  const isTouch =
+    typeof window !== "undefined" &&
+    window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+
+  if (isTouch) return null;
+  return <MagicCursorInner />;
 }
