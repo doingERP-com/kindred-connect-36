@@ -18,7 +18,7 @@ const Index = () => {
       </Helmet>
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main>
+        <main className="pb-48 md:pb-56">
           <HeroSection />
           <AIFeatureSection />
           <StatsSection />
