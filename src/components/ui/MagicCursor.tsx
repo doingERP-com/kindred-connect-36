@@ -9,7 +9,13 @@ interface Particle {
   createdAt: number;
 }
 
+// Detect touch-only devices (no mouse)
+const isTouchDevice = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+
 export function MagicCursor() {
+  if (isTouchDevice()) return null;
   const [pos, setPos] = useState({ x: -100, y: -100 });
   const [trail, setTrail] = useState<Particle[]>([]);
   const [isHovering, setIsHovering] = useState(false);
