@@ -285,11 +285,11 @@ export function FloatingAIWidget() {
   ];
 
   return (
-    <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl transition-all duration-500 ${isGlowing ? 'scale-105' : ''}`}>
+    <div className={`fixed bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-50 w-[95%] md:w-[90%] max-w-3xl transition-all duration-500 ${isGlowing ? 'scale-105' : ''}`}>
       {/* Chat Panel */}
       {messages.length > 0 && (
         <div
-          className="mb-3 relative rounded-2xl border border-border overflow-hidden"
+          className="mb-2 md:mb-3 relative rounded-2xl border border-border overflow-hidden"
           style={{ background: 'hsl(222 47% 7%)' }}
         >
           <button
@@ -300,14 +300,14 @@ export function FloatingAIWidget() {
             <X size={14} className="text-foreground" />
           </button>
 
-          <div className="max-h-[22rem] overflow-y-auto space-y-2 p-4 scrollbar-thin">
+          <div className="max-h-[40vh] md:max-h-[22rem] overflow-y-auto space-y-2 p-3 md:p-4 scrollbar-thin">
             {messages.map((m, i) => (
               <div
                 key={i}
-                className={`text-sm p-3 rounded-lg ${
+                className={`text-sm p-2 md:p-3 rounded-lg ${
                   m.role === "assistant"
                     ? "text-foreground"
-                    : "ml-8 text-muted-foreground"
+                    : "ml-6 md:ml-8 text-muted-foreground"
                 }`}
                 style={{
                   background: m.role === "assistant"
@@ -323,7 +323,7 @@ export function FloatingAIWidget() {
             ))}
             {isLoading && (
               <div
-                className="text-sm p-3 rounded-lg text-foreground"
+                className="text-sm p-2 md:p-3 rounded-lg text-foreground"
                 style={{ background: 'hsl(222 47% 11%)' }}
               >
                 <span className="font-medium text-xs text-primary mr-2">Lisa:</span>
@@ -354,9 +354,9 @@ export function FloatingAIWidget() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask Lisa about ERP issues, Oracle Cloud HCM, or implementations..."
-              rows={3}
-              className="flex-1 py-4 px-6 bg-transparent text-foreground placeholder:text-muted-foreground text-base outline-none resize-none"
+              placeholder="Ask Lisa..."
+              rows={2}
+              className="flex-1 py-3 md:py-4 px-4 md:px-6 bg-transparent text-foreground placeholder:text-muted-foreground text-sm md:text-base outline-none resize-none"
               disabled={isLoading}
             />
 
@@ -365,12 +365,12 @@ export function FloatingAIWidget() {
                 <button
                   onClick={sendTextMessage}
                   disabled={isLoading}
-                  className="w-10 h-10 rounded-full flex items-center justify-center bg-secondary hover:bg-secondary/80 transition-colors"
+                  className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-secondary hover:bg-secondary/80 transition-colors"
                 >
                   {isLoading ? (
-                    <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                    <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-primary animate-spin" />
                   ) : (
-                    <Send className="w-5 h-5 text-primary" />
+                    <Send className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                   )}
                 </button>
               )}
@@ -378,7 +378,7 @@ export function FloatingAIWidget() {
               <button
                 onClick={handleToggleCall}
                 disabled={isConnecting || isLoading}
-                className={`w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 ${
+                className={`w-11 h-11 md:w-14 md:h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 ${
                   isCallActive
                     ? isSpeaking
                       ? "bg-primary animate-pulse shadow-[0_0_30px_hsl(187_100%_42%/0.5)]"
@@ -387,11 +387,11 @@ export function FloatingAIWidget() {
                 }`}
               >
                 {isConnecting ? (
-                  <Loader2 className="w-6 h-6 text-primary-foreground animate-spin" />
+                  <Loader2 className="w-5 h-5 text-primary-foreground animate-spin" />
                 ) : isCallActive ? (
-                  <MicOff className="w-6 h-6 text-primary-foreground" />
+                  <MicOff className="w-5 h-5 text-primary-foreground" />
                 ) : (
-                  <Mic className="w-6 h-6 text-primary-foreground" />
+                  <Mic className="w-5 h-5 text-primary-foreground" />
                 )}
               </button>
             </div>
@@ -399,13 +399,13 @@ export function FloatingAIWidget() {
 
           {/* Suggestion Chips — inside the box, below the textarea */}
           {messages.length === 0 && !isCallActive && (
-            <div className="flex gap-1.5 px-4 pb-3 pt-1 overflow-x-auto no-scrollbar border-t border-border/40">
+            <div className="flex gap-1.5 px-3 md:px-4 pb-2 md:pb-3 pt-1 overflow-x-auto no-scrollbar border-t border-border/40">
               {SUGGESTIONS.map((s) => (
                 <button
                   key={s}
                   onClick={() => sendSuggestion(s)}
                   disabled={isLoading}
-                  className="flex-shrink-0 px-3 py-1 rounded-full text-xs border border-border text-muted-foreground hover:text-foreground hover:border-primary/60 transition-all duration-200 whitespace-nowrap"
+                  className="flex-shrink-0 px-2.5 py-1 rounded-full text-xs border border-border text-muted-foreground hover:text-foreground hover:border-primary/60 transition-all duration-200 whitespace-nowrap"
                   style={{ background: 'hsl(222 47% 13%)' }}
                 >
                   {s}
@@ -416,14 +416,14 @@ export function FloatingAIWidget() {
         </div>
       </div>
 
-      <p className="text-center text-muted-foreground text-sm mt-4">
+      <p className="text-center text-muted-foreground text-xs md:text-sm mt-2 md:mt-4">
         {isCallActive
           ? isSpeaking
             ? "Lisa is speaking..."
             : "Listening... Speak now"
           : isLoading
             ? "Lisa is thinking..."
-            : "Type a message or click the mic to speak with Lisa"}
+            : "Type a message or tap the mic to speak with Lisa"}
       </p>
     </div>
   );
