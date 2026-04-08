@@ -196,12 +196,13 @@ export function FloatingAIWidget() {
 
     const messageContent = inputText.trim();
 
-    // Check for "doctor ai" trigger
-    if (messageContent.toLowerCase().includes("doctor ai")) {
+    // Check for special agent triggers
+    const specialAgentId = detectSpecialAgent(messageContent);
+    if (specialAgentId) {
       const userMessage: Message = { role: "user", content: messageContent };
       setMessages(prev => [...prev, userMessage]);
       setInputText("");
-      await switchToDoctorAI();
+      await switchToSpecialAgent(specialAgentId);
       return;
     }
 
