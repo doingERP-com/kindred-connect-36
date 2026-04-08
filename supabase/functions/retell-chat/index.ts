@@ -21,15 +21,18 @@ serve(async (req) => {
     // Create a new chat session
     if (action === "create_chat") {
       console.log("Creating chat session for agent:", agent_id);
-      
+
       const response = await fetch("https://api.retellai.com/create-chat", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${RETELL_API_KEY}`,
+          Authorization: `Bearer ${RETELL_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           agent_id: agent_id,
+          customer_id: "feb8dc09-6566-4d2a-bcc1-79a1abde07a7",
+          agent_name: "Lisa",
+          customer_company: "XYZ Rental Management",
         }),
       });
 
@@ -58,7 +61,7 @@ serve(async (req) => {
       const response = await fetch("https://api.retellai.com/create-chat-completion", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${RETELL_API_KEY}`,
+          Authorization: `Bearer ${RETELL_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -78,11 +81,9 @@ serve(async (req) => {
 
       // Extract the latest agent message - check both current response and full history
       const messages = data.messages || [];
-      
+
       // Filter only real content messages (exclude node_transition, etc.)
-      const agentMessages = messages.filter(
-        (m: { role: string; content?: string }) => m.role === "agent" && m.content
-      );
+      const agentMessages = messages.filter((m: { role: string; content?: string }) => m.role === "agent" && m.content);
       const lastAgentMessage = agentMessages[agentMessages.length - 1];
 
       // Also check top-level response field that Retell sometimes returns
@@ -90,16 +91,18 @@ serve(async (req) => {
 
       console.log("Agent messages found:", agentMessages.length, "Response:", responseText);
 
-      return new Response(JSON.stringify({ 
-        response: responseText || "I'm sorry, I couldn't generate a response.",
-        messages: messages
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          response: responseText || "I'm sorry, I couldn't generate a response.",
+          messages: messages,
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
 
     throw new Error("Invalid action. Use 'create_chat' or 'send_message'");
-
   } catch (error) {
     console.error("Error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
