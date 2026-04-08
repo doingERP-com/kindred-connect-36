@@ -150,22 +150,21 @@ export function FloatingAIWidget() {
     }
   };
 
-  // Switch to Doctor AI: disconnect current voice agent and start a chat session with Doctor AI, then send "Hi"
-  const switchToDoctorAI = async () => {
+  // Switch to a special agent: disconnect current voice agent and start a chat session, then send "Hi"
+  const switchToSpecialAgent = async (agentId: string) => {
     stopCall();
     chatSessionIdRef.current = null;
     setIsLoading(true);
 
     try {
       const { data: chatData, error: chatError } = await supabase.functions.invoke("retell-chat", {
-        body: { action: "create_chat", agent_id: DOCTOR_AI_AGENT_ID },
+        body: { action: "create_chat", agent_id: agentId },
       });
       if (chatError || !chatData?.chat_id) {
-        throw new Error(chatError?.message || "Failed to create Doctor AI chat session");
+        throw new Error(chatError?.message || "Failed to create chat session");
       }
       chatSessionIdRef.current = chatData.chat_id;
 
-      // Send initial "Hi" message automatically
       const { data, error } = await supabase.functions.invoke("retell-chat", {
         body: {
           action: "send_message",
@@ -180,10 +179,10 @@ export function FloatingAIWidget() {
         content: data?.response || "Hello! How can I help you?",
       }]);
     } catch (error) {
-      console.error("Failed to connect to Doctor AI:", error);
+      console.error("Failed to connect to special agent:", error);
       toast({
         title: "Error",
-        description: "Failed to connect to Doctor AI. Please try again.",
+        description: "Failed to connect. Please try again.",
         variant: "destructive",
       });
     } finally {
