@@ -11,7 +11,19 @@ interface Message {
 
 const VOICE_AGENT_ID = "agent_034266f5f5da7f771e6ce8a76d";
 const DOCTOR_AI_AGENT_ID = "agent_a14a542d3a6ac9353e45338f3a";
+const PROPERTY_AGENT_ID = "agent_d08b63f706de8be2deb9a1e25a";
 const CHAT_AGENT_ID = "agent_02c29f63f5d480c9737369dbf9";
+
+const detectSpecialAgent = (text: string): string | null => {
+  const lower = text.toLowerCase();
+  if (lower.includes("doctor") || lower.includes("medical") || lower.includes("health")) {
+    return DOCTOR_AI_AGENT_ID;
+  }
+  if (lower.includes("rent") || lower.includes("property") || lower.includes("maintenance") || lower.includes("tenant") || lower.includes("lease")) {
+    return PROPERTY_AGENT_ID;
+  }
+  return null;
+};
 
 export function FloatingAIWidget() {
   const [isCallActive, setIsCallActive] = useState(false);
