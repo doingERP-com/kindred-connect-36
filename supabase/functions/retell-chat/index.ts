@@ -30,10 +30,6 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           agent_id: agent_id,
-          customer_id: "feb8dc09-6566-4d2a-bcc1-79a1abde07a7",
-          agent_name: "Lisa",
-          customer_company: "KairosFS",
-          customer_name: "Roy",
         }),
       });
 

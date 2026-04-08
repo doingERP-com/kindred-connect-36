@@ -19,7 +19,13 @@ const detectSpecialAgent = (text: string): string | null => {
   if (lower.includes("doctor") || lower.includes("medical") || lower.includes("health")) {
     return DOCTOR_AI_AGENT_ID;
   }
-  if (lower.includes("rent") || lower.includes("property") || lower.includes("maintenance") || lower.includes("tenant") || lower.includes("lease")) {
+  if (
+    lower.includes("rent") ||
+    lower.includes("property") ||
+    lower.includes("maintenance") ||
+    lower.includes("tenant") ||
+    lower.includes("lease")
+  ) {
     return PROPERTY_AGENT_ID;
   }
   return null;
@@ -45,8 +51,8 @@ export function FloatingAIWidget() {
   }, []);
 
   useEffect(() => {
-    window.addEventListener('triggerLisaGlow', handleGlowTrigger);
-    return () => window.removeEventListener('triggerLisaGlow', handleGlowTrigger);
+    window.addEventListener("triggerLisaGlow", handleGlowTrigger);
+    return () => window.removeEventListener("triggerLisaGlow", handleGlowTrigger);
   }, [handleGlowTrigger]);
 
   useEffect(() => {
@@ -158,7 +164,14 @@ export function FloatingAIWidget() {
 
     try {
       const { data: chatData, error: chatError } = await supabase.functions.invoke("retell-chat", {
-        body: { action: "create_chat", agent_id: agentId },
+        body: {
+          action: "create_chat",
+          agent_id: agentId,
+          customer_id: "feb8dc09-6566-4d2a-bcc1-79a1abde07a7",
+          agent_name: "Lisa",
+          customer_company: "KairosFS",
+          customer_name: "Roy",
+        },
       });
       if (chatError || !chatData?.chat_id) {
         throw new Error(chatError?.message || "Failed to create chat session");
@@ -174,10 +187,13 @@ export function FloatingAIWidget() {
       });
       if (error) throw new Error(error.message);
 
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: data?.response || "Hello! How can I help you?",
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: data?.response || "Hello! How can I help you?",
+        },
+      ]);
     } catch (error) {
       console.error("Failed to connect to special agent:", error);
       toast({
@@ -200,14 +216,14 @@ export function FloatingAIWidget() {
     const specialAgentId = detectSpecialAgent(messageContent);
     if (specialAgentId) {
       const userMessage: Message = { role: "user", content: messageContent };
-      setMessages(prev => [...prev, userMessage]);
+      setMessages((prev) => [...prev, userMessage]);
       setInputText("");
       await switchToSpecialAgent(specialAgentId);
       return;
     }
 
     const userMessage: Message = { role: "user", content: messageContent };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputText("");
     setIsLoading(true);
 
@@ -235,10 +251,13 @@ export function FloatingAIWidget() {
 
       if (error) throw new Error(error.message);
 
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: data?.response || "I'm sorry, I couldn't generate a response.",
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: data?.response || "I'm sorry, I couldn't generate a response.",
+        },
+      ]);
     } catch (error) {
       console.error("Chat error:", error);
       toast({
@@ -266,7 +285,7 @@ export function FloatingAIWidget() {
   const sendSuggestion = async (text: string) => {
     if (isLoading) return;
     const userMessage: Message = { role: "user", content: text };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
     try {
       if (!chatSessionIdRef.current) {
@@ -280,7 +299,10 @@ export function FloatingAIWidget() {
         body: { action: "send_message", session_id: chatSessionIdRef.current, message: text },
       });
       if (error) throw new Error(error.message);
-      setMessages(prev => [...prev, { role: "assistant", content: data?.response || "I'm sorry, I couldn't generate a response." }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data?.response || "I'm sorry, I couldn't generate a response." },
+      ]);
     } catch (error) {
       toast({ title: "Error", description: "Failed to send message. Please try again.", variant: "destructive" });
     } finally {
@@ -297,12 +319,14 @@ export function FloatingAIWidget() {
   ];
 
   return (
-    <div className={`fixed bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-50 w-[95%] md:w-[90%] max-w-3xl transition-all duration-500 ${isGlowing ? 'scale-105' : ''}`}>
+    <div
+      className={`fixed bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-50 w-[95%] md:w-[90%] max-w-3xl transition-all duration-500 ${isGlowing ? "scale-105" : ""}`}
+    >
       {/* Chat Panel */}
       {messages.length > 0 && (
         <div
           className="mb-2 md:mb-3 relative rounded-2xl border border-border overflow-hidden"
-          style={{ background: 'hsl(222 47% 7%)' }}
+          style={{ background: "hsl(222 47% 7%)" }}
         >
           <button
             onClick={clearChat}
@@ -317,14 +341,10 @@ export function FloatingAIWidget() {
               <div
                 key={i}
                 className={`text-sm p-2 md:p-3 rounded-lg ${
-                  m.role === "assistant"
-                    ? "text-foreground"
-                    : "ml-6 md:ml-8 text-muted-foreground"
+                  m.role === "assistant" ? "text-foreground" : "ml-6 md:ml-8 text-muted-foreground"
                 }`}
                 style={{
-                  background: m.role === "assistant"
-                    ? 'hsl(222 47% 11%)'
-                    : 'hsl(222 47% 14%)',
+                  background: m.role === "assistant" ? "hsl(222 47% 11%)" : "hsl(222 47% 14%)",
                 }}
               >
                 <span className="font-medium text-xs text-primary mr-2">
@@ -334,15 +354,18 @@ export function FloatingAIWidget() {
               </div>
             ))}
             {isLoading && (
-              <div
-                className="text-sm p-2 md:p-3 rounded-lg text-foreground"
-                style={{ background: 'hsl(222 47% 11%)' }}
-              >
+              <div className="text-sm p-2 md:p-3 rounded-lg text-foreground" style={{ background: "hsl(222 47% 11%)" }}>
                 <span className="font-medium text-xs text-primary mr-2">Lisa:</span>
                 <span className="inline-flex items-center gap-1">
                   <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <span
+                    className="w-2 h-2 bg-primary rounded-full animate-bounce"
+                    style={{ animationDelay: "150ms" }}
+                  />
+                  <span
+                    className="w-2 h-2 bg-primary rounded-full animate-bounce"
+                    style={{ animationDelay: "300ms" }}
+                  />
                 </span>
               </div>
             )}
@@ -356,10 +379,10 @@ export function FloatingAIWidget() {
         <div
           className={`flex-1 border rounded-2xl flex flex-col transition-all duration-500 overflow-hidden ${
             isGlowing
-              ? 'border-primary shadow-[0_0_40px_hsl(5_91%_52%/0.5),0_0_80px_hsl(5_91%_52%/0.3)] animate-pulse'
-              : 'border-border'
+              ? "border-primary shadow-[0_0_40px_hsl(5_91%_52%/0.5),0_0_80px_hsl(5_91%_52%/0.3)] animate-pulse"
+              : "border-border"
           }`}
-          style={{ background: 'hsl(222 47% 10%)' }}
+          style={{ background: "hsl(222 47% 10%)" }}
         >
           <div className="flex items-end pr-2 pb-2">
             <textarea
@@ -418,7 +441,7 @@ export function FloatingAIWidget() {
                   onClick={() => sendSuggestion(s)}
                   disabled={isLoading}
                   className="flex-shrink-0 px-2.5 py-1 rounded-full text-xs border border-border text-muted-foreground hover:text-foreground hover:border-primary/60 transition-all duration-200 whitespace-nowrap"
-                  style={{ background: 'hsl(222 47% 13%)' }}
+                  style={{ background: "hsl(222 47% 13%)" }}
                 >
                   {s}
                 </button>
