@@ -20,7 +20,7 @@ const detectSpecialAgent = (text: string): string | null => {
     return DOCTOR_AI_AGENT_ID;
   }
   if (
-    lower.includes("rent") ||
+    lower.includes("realtor") ||
     lower.includes("property") ||
     lower.includes("maintenance") ||
     lower.includes("tenant") ||
