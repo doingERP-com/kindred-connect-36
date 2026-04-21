@@ -451,15 +451,20 @@ export function FloatingAIWidget() {
         </div>
       </div>
 
-      <p className="text-center text-muted-foreground text-xs md:text-sm mt-2 md:mt-4">
-        {isCallActive
-          ? isSpeaking
-            ? "Lisa is speaking..."
-            : "Listening... Speak now"
-          : isLoading
-            ? "Lisa is thinking..."
-            : "Type a message or tap the mic to speak with Lisa"}
-      </p>
+      <div className="flex justify-center mt-2 md:mt-3">
+        <p
+          className="text-center text-muted-foreground text-xs md:text-sm px-3 py-1 rounded-full backdrop-blur-md border border-border/40"
+          style={{ background: "hsl(222 47% 7% / 0.75)" }}
+        >
+          {isCallActive
+            ? isSpeaking
+              ? "Lisa is speaking..."
+              : "Listening... Speak now"
+            : isLoading
+              ? "Lisa is thinking..."
+              : "Type a message or tap the mic to speak with Lisa"}
+        </p>
+      </div>
     </div>
   );
 }
