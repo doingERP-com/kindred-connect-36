@@ -389,14 +389,14 @@ export function FloatingAIWidget() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask Lisa..."
+              placeholder="Type a message or tap the mic to speak with Lisa"
               rows={2}
               className="flex-1 py-3 md:py-4 px-4 md:px-6 bg-transparent text-foreground placeholder:text-muted-foreground text-sm md:text-base outline-none resize-none"
               disabled={isLoading}
             />
 
             <div className="flex items-center gap-1 mb-1">
-              {inputText.trim() && (
+              {inputText.trim() ? (
                 <button
                   onClick={sendTextMessage}
                   disabled={isLoading}
@@ -408,27 +408,27 @@ export function FloatingAIWidget() {
                     <Send className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                   )}
                 </button>
+              ) : (
+                <button
+                  onClick={handleToggleCall}
+                  disabled={isConnecting || isLoading}
+                  className={`w-11 h-11 md:w-14 md:h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 ${
+                    isCallActive
+                      ? isSpeaking
+                        ? "bg-primary animate-pulse shadow-[0_0_30px_hsl(187_100%_42%/0.5)]"
+                        : "bg-primary shadow-[0_0_20px_hsl(187_100%_42%/0.4)]"
+                      : "bg-primary hover:scale-105 hover:shadow-[0_0_25px_hsl(187_100%_42%/0.4)]"
+                  }`}
+                >
+                  {isConnecting ? (
+                    <Loader2 className="w-5 h-5 text-primary-foreground animate-spin" />
+                  ) : isCallActive ? (
+                    <MicOff className="w-5 h-5 text-primary-foreground" />
+                  ) : (
+                    <Mic className="w-5 h-5 text-primary-foreground" />
+                  )}
+                </button>
               )}
-
-              <button
-                onClick={handleToggleCall}
-                disabled={isConnecting || isLoading}
-                className={`w-11 h-11 md:w-14 md:h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 ${
-                  isCallActive
-                    ? isSpeaking
-                      ? "bg-primary animate-pulse shadow-[0_0_30px_hsl(187_100%_42%/0.5)]"
-                      : "bg-primary shadow-[0_0_20px_hsl(187_100%_42%/0.4)]"
-                    : "bg-primary hover:scale-105 hover:shadow-[0_0_25px_hsl(187_100%_42%/0.4)]"
-                }`}
-              >
-                {isConnecting ? (
-                  <Loader2 className="w-5 h-5 text-primary-foreground animate-spin" />
-                ) : isCallActive ? (
-                  <MicOff className="w-5 h-5 text-primary-foreground" />
-                ) : (
-                  <Mic className="w-5 h-5 text-primary-foreground" />
-                )}
-              </button>
             </div>
           </div>
 
