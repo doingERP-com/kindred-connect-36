@@ -400,20 +400,20 @@ export function FloatingAIWidget() {
                 <button
                   onClick={sendTextMessage}
                   disabled={isLoading}
-                  className="w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center bg-secondary hover:bg-secondary/80 transition-colors"
+                  className="w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center bg-secondary hover:bg-secondary/80 transition-colors"
                   aria-label="Send message"
                 >
                   {isLoading ? (
-                    <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                    <Loader2 className="w-5 h-5 md:w-6 md:h-6 text-primary animate-spin" />
                   ) : (
-                    <Send className="w-4 h-4 text-primary" />
+                    <Send className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                   )}
                 </button>
               ) : (
                 <button
                   onClick={handleToggleCall}
                   disabled={isConnecting || isLoading}
-                  className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  className={`w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
                     isCallActive
                       ? isSpeaking
                         ? "bg-primary animate-pulse"
@@ -423,11 +423,11 @@ export function FloatingAIWidget() {
                   aria-label={isCallActive ? "Stop voice call" : "Start voice call"}
                 >
                   {isConnecting ? (
-                    <Loader2 className="w-4 h-4 text-primary-foreground animate-spin" />
+                    <Loader2 className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground animate-spin" />
                   ) : isCallActive ? (
-                    <MicOff className="w-4 h-4 text-primary-foreground" />
+                    <MicOff className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground" />
                   ) : (
-                    <Mic className="w-4 h-4 text-primary-foreground" />
+                    <Mic className="w-5 h-5 md:w-6 md:h-6 text-primary-foreground" />
                   )}
                 </button>
               )}
