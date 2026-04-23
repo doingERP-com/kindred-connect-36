@@ -395,7 +395,7 @@ export function FloatingAIWidget() {
               disabled={isLoading}
             />
 
-            <div className="flex items-center flex-shrink-0 md:my-1.5 md:p-1 md:rounded-full md:bg-background/40 md:border md:border-border/60 md:ring-1 md:ring-primary/10 md:shadow-[0_0_0_4px_hsl(222_47%_10%)]">
+            <div className="flex items-center flex-shrink-0 my-1 p-0.5 md:my-1.5 md:p-1 rounded-full bg-background/40 border border-border/60 ring-1 ring-primary/10 shadow-[0_0_0_3px_hsl(222_47%_10%)] md:shadow-[0_0_0_4px_hsl(222_47%_10%)]">
               {inputText.trim() ? (
                 <button
                   onClick={sendTextMessage}
