@@ -41,6 +41,7 @@ export function FloatingAIWidget() {
   const [isGlowing, setIsGlowing] = useState(false);
   const retellClientRef = useRef<RetellWebClient | null>(null);
   const chatSessionIdRef = useRef<string | null>(null);
+  const currentAgentIdRef = useRef<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -177,6 +178,7 @@ export function FloatingAIWidget() {
         throw new Error(chatError?.message || "Failed to create chat session");
       }
       chatSessionIdRef.current = chatData.chat_id;
+      currentAgentIdRef.current = agentId;
 
       const { data, error } = await supabase.functions.invoke("retell-chat", {
         body: {
@@ -212,9 +214,9 @@ export function FloatingAIWidget() {
 
     const messageContent = inputText.trim();
 
-    // Check for special agent triggers
+    // Check for special agent triggers — only switch if we're not already on that agent
     const specialAgentId = detectSpecialAgent(messageContent);
-    if (specialAgentId) {
+    if (specialAgentId && currentAgentIdRef.current !== specialAgentId) {
       const userMessage: Message = { role: "user", content: messageContent };
       setMessages((prev) => [...prev, userMessage]);
       setInputText("");
@@ -238,6 +240,7 @@ export function FloatingAIWidget() {
           throw new Error(chatError?.message || "Failed to create chat session");
         }
         chatSessionIdRef.current = chatData.chat_id;
+        currentAgentIdRef.current = CHAT_AGENT_ID;
       }
 
       // Send message
@@ -280,6 +283,7 @@ export function FloatingAIWidget() {
   const clearChat = () => {
     setMessages([]);
     chatSessionIdRef.current = null;
+    currentAgentIdRef.current = null;
   };
 
   const sendSuggestion = async (text: string) => {
@@ -294,6 +298,7 @@ export function FloatingAIWidget() {
         });
         if (chatError || !chatData?.chat_id) throw new Error(chatError?.message || "Failed to create chat session");
         chatSessionIdRef.current = chatData.chat_id;
+        currentAgentIdRef.current = CHAT_AGENT_ID;
       }
       const { data, error } = await supabase.functions.invoke("retell-chat", {
         body: { action: "send_message", session_id: chatSessionIdRef.current, message: text },
