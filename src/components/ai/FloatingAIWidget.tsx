@@ -240,6 +240,7 @@ export function FloatingAIWidget() {
           throw new Error(chatError?.message || "Failed to create chat session");
         }
         chatSessionIdRef.current = chatData.chat_id;
+        currentAgentIdRef.current = CHAT_AGENT_ID;
       }
 
       // Send message
