@@ -320,7 +320,7 @@ export function FloatingAIWidget() {
 
   return (
     <div
-      className={`fixed bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-50 w-[95%] md:w-[80%] max-w-3xl md:max-w-xl transition-all duration-500 ${isGlowing ? "scale-105" : ""}`}
+      className={`fixed bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-50 w-[95%] md:w-[85%] max-w-3xl md:max-w-2xl transition-all duration-500 ${isGlowing ? "scale-105" : ""}`}
     >
       {/* Chat Panel */}
       {messages.length > 0 && (
@@ -384,7 +384,7 @@ export function FloatingAIWidget() {
           }`}
           style={{ background: "hsl(222 47% 10%)" }}
         >
-          <div className="flex items-center pr-2 md:pr-3 gap-1.5 md:gap-2">
+          <div className="flex items-center pr-2 md:pr-4 gap-1.5 md:gap-3">
             <input
               type="text"
               value={inputText}
