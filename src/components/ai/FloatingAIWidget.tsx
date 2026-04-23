@@ -157,8 +157,8 @@ export function FloatingAIWidget() {
     }
   };
 
-  // Switch to a special agent: disconnect current voice agent and start a chat session, then send "Hi"
-  const switchToSpecialAgent = async (agentId: string) => {
+  // Switch to a special agent: disconnect current voice agent and start a chat session, then forward the user's first message
+  const switchToSpecialAgent = async (agentId: string, firstMessage: string = "Hi") => {
     stopCall();
     chatSessionIdRef.current = null;
     setIsLoading(true);
@@ -184,7 +184,7 @@ export function FloatingAIWidget() {
         body: {
           action: "send_message",
           session_id: chatData.chat_id,
-          message: "Hi",
+          message: firstMessage,
         },
       });
       if (error) throw new Error(error.message);
@@ -198,6 +198,9 @@ export function FloatingAIWidget() {
       ]);
     } catch (error) {
       console.error("Failed to connect to special agent:", error);
+      // Reset session refs on failure so the next message can retry cleanly
+      chatSessionIdRef.current = null;
+      currentAgentIdRef.current = null;
       toast({
         title: "Error",
         description: "Failed to connect. Please try again.",
