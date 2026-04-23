@@ -390,8 +390,8 @@ export function FloatingAIWidget() {
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type a message or tap the mic to speak with Lisa"
-              rows={2}
-              className="flex-1 py-3 md:py-4 px-4 md:px-6 bg-transparent text-foreground placeholder:text-muted-foreground text-sm md:text-base outline-none resize-none"
+              rows={1}
+              className="flex-1 py-2.5 md:py-2.5 px-4 md:px-5 bg-transparent text-foreground placeholder:text-muted-foreground text-sm outline-none resize-none min-h-[44px] md:min-h-[40px]"
               disabled={isLoading}
             />
 
