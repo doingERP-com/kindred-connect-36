@@ -283,6 +283,7 @@ export function FloatingAIWidget() {
   const clearChat = () => {
     setMessages([]);
     chatSessionIdRef.current = null;
+    currentAgentIdRef.current = null;
   };
 
   const sendSuggestion = async (text: string) => {
