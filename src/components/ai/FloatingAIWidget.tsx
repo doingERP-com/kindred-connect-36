@@ -395,39 +395,39 @@ export function FloatingAIWidget() {
               disabled={isLoading}
             />
 
-            <div className="flex items-center flex-shrink-0">
+            <div className="flex items-center flex-shrink-0 md:my-1.5 md:p-1 md:rounded-full md:bg-background/40 md:border md:border-border/60 md:ring-1 md:ring-primary/10 md:shadow-[0_0_0_4px_hsl(222_47%_10%)]">
               {inputText.trim() ? (
                 <button
                   onClick={sendTextMessage}
                   disabled={isLoading}
-                  className="w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center bg-secondary hover:bg-secondary/80 transition-colors"
+                  className="w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center bg-secondary hover:bg-secondary/80 transition-colors"
                   aria-label="Send message"
                 >
                   {isLoading ? (
-                    <Loader2 className="w-4 h-4 md:w-6 md:h-6 text-primary animate-spin" />
+                    <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-primary animate-spin" />
                   ) : (
-                    <Send className="w-4 h-4 md:w-6 md:h-6 text-primary" />
+                    <Send className="w-4 h-4 md:w-5 md:h-5 text-primary" />
                   )}
                 </button>
               ) : (
                 <button
                   onClick={handleToggleCall}
                   disabled={isConnecting || isLoading}
-                  className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  className={`w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center transition-all duration-300 ${
                     isCallActive
                       ? isSpeaking
                         ? "bg-primary animate-pulse"
                         : "bg-primary"
-                      : "bg-primary hover:bg-primary/90"
+                      : "bg-primary hover:bg-primary/90 hover:shadow-[0_0_18px_hsl(5_91%_52%/0.45)]"
                   }`}
                   aria-label={isCallActive ? "Stop voice call" : "Start voice call"}
                 >
                   {isConnecting ? (
-                    <Loader2 className="w-4 h-4 md:w-6 md:h-6 text-primary-foreground animate-spin" />
+                    <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-primary-foreground animate-spin" />
                   ) : isCallActive ? (
-                    <MicOff className="w-4 h-4 md:w-6 md:h-6 text-primary-foreground" />
+                    <MicOff className="w-4 h-4 md:w-5 md:h-5 text-primary-foreground" />
                   ) : (
-                    <Mic className="w-4 h-4 md:w-6 md:h-6 text-primary-foreground" />
+                    <Mic className="w-4 h-4 md:w-5 md:h-5 text-primary-foreground" />
                   )}
                 </button>
               )}
