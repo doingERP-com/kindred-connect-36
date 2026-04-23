@@ -214,9 +214,9 @@ export function FloatingAIWidget() {
 
     const messageContent = inputText.trim();
 
-    // Check for special agent triggers
+    // Check for special agent triggers — only switch if we're not already on that agent
     const specialAgentId = detectSpecialAgent(messageContent);
-    if (specialAgentId) {
+    if (specialAgentId && currentAgentIdRef.current !== specialAgentId) {
       const userMessage: Message = { role: "user", content: messageContent };
       setMessages((prev) => [...prev, userMessage]);
       setInputText("");
