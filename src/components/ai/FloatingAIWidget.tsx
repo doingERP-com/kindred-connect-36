@@ -377,10 +377,10 @@ export function FloatingAIWidget() {
       {/* Main Input Bar */}
       <div className="relative flex items-end">
         <div
-          className={`flex-1 border rounded-2xl flex flex-col transition-all duration-500 overflow-hidden ${
+          className={`flex-1 border rounded-2xl flex flex-col transition-all duration-500 overflow-hidden md:shadow-[0_0_30px_hsl(5_91%_52%/0.25),0_0_60px_hsl(5_91%_52%/0.15)] md:hover:shadow-[0_0_40px_hsl(5_91%_52%/0.4),0_0_80px_hsl(5_91%_52%/0.2)] ${
             isGlowing
               ? "border-primary shadow-[0_0_40px_hsl(5_91%_52%/0.5),0_0_80px_hsl(5_91%_52%/0.3)] animate-pulse"
-              : "border-border"
+              : "border-border md:border-primary/30"
           }`}
           style={{ background: "hsl(222 47% 10%)" }}
         >
