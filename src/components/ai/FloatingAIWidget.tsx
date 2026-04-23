@@ -168,7 +168,7 @@ export function FloatingAIWidget() {
         body: {
           action: "create_chat",
           agent_id: agentId,
-          customer_id: "feb8dc09-6566-4d2a-bcc1-79a1abde07a7",
+          customer_id: "0d6ac83c-5cd2-4a41-9be6-4d953080c520",
           agent_name: "Lisa",
           customer_company: "KairosFS",
           customer_name: "Roy",
@@ -468,7 +468,6 @@ export function FloatingAIWidget() {
           )}
         </div>
       </div>
-
     </div>
   );
 }
