@@ -436,7 +436,7 @@ export function FloatingAIWidget() {
 
           {/* Suggestion Chips — inside the box, below the textarea */}
           {messages.length === 0 && !isCallActive && (
-            <div className="flex gap-1.5 px-3 md:px-4 pb-2 md:pb-3 pt-1 overflow-x-auto no-scrollbar border-t border-border/40">
+            <div className="flex gap-1.5 md:flex-wrap px-3 md:px-4 pb-2 md:pb-3 pt-1 overflow-x-auto md:overflow-visible no-scrollbar border-t border-border/40">
               {SUGGESTIONS.map((s) => (
                 <button
                   key={s}
