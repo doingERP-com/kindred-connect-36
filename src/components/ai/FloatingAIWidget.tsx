@@ -178,6 +178,7 @@ export function FloatingAIWidget() {
         throw new Error(chatError?.message || "Failed to create chat session");
       }
       chatSessionIdRef.current = chatData.chat_id;
+      currentAgentIdRef.current = agentId;
 
       const { data, error } = await supabase.functions.invoke("retell-chat", {
         body: {
