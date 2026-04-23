@@ -41,6 +41,7 @@ export function FloatingAIWidget() {
   const [isGlowing, setIsGlowing] = useState(false);
   const retellClientRef = useRef<RetellWebClient | null>(null);
   const chatSessionIdRef = useRef<string | null>(null);
+  const currentAgentIdRef = useRef<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
