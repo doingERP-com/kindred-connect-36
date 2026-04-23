@@ -157,8 +157,8 @@ export function FloatingAIWidget() {
     }
   };
 
-  // Switch to a special agent: disconnect current voice agent and start a chat session, then send "Hi"
-  const switchToSpecialAgent = async (agentId: string) => {
+  // Switch to a special agent: disconnect current voice agent and start a chat session, then forward the user's first message
+  const switchToSpecialAgent = async (agentId: string, firstMessage: string = "Hi") => {
     stopCall();
     chatSessionIdRef.current = null;
     setIsLoading(true);
@@ -184,7 +184,7 @@ export function FloatingAIWidget() {
         body: {
           action: "send_message",
           session_id: chatData.chat_id,
-          message: "Hi",
+          message: firstMessage,
         },
       });
       if (error) throw new Error(error.message);
@@ -198,6 +198,9 @@ export function FloatingAIWidget() {
       ]);
     } catch (error) {
       console.error("Failed to connect to special agent:", error);
+      // Reset session refs on failure so the next message can retry cleanly
+      chatSessionIdRef.current = null;
+      currentAgentIdRef.current = null;
       toast({
         title: "Error",
         description: "Failed to connect. Please try again.",
@@ -220,7 +223,8 @@ export function FloatingAIWidget() {
       const userMessage: Message = { role: "user", content: messageContent };
       setMessages((prev) => [...prev, userMessage]);
       setInputText("");
-      await switchToSpecialAgent(specialAgentId);
+      // Forward the user's actual message to the new agent instead of a hardcoded "Hi"
+      await switchToSpecialAgent(specialAgentId, messageContent);
       return;
     }
 
@@ -263,9 +267,13 @@ export function FloatingAIWidget() {
       ]);
     } catch (error) {
       console.error("Chat error:", error);
+      // Reset session on error — the chat may have expired on Retell's side.
+      // The next message will create a fresh session instead of repeatedly hitting a dead one.
+      chatSessionIdRef.current = null;
+      currentAgentIdRef.current = null;
       toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
+        title: "Connection lost",
+        description: "Reconnecting… please send your message again.",
         variant: "destructive",
       });
     } finally {
@@ -309,7 +317,10 @@ export function FloatingAIWidget() {
         { role: "assistant", content: data?.response || "I'm sorry, I couldn't generate a response." },
       ]);
     } catch (error) {
-      toast({ title: "Error", description: "Failed to send message. Please try again.", variant: "destructive" });
+      // Reset session on error so the next attempt creates a fresh chat
+      chatSessionIdRef.current = null;
+      currentAgentIdRef.current = null;
+      toast({ title: "Connection lost", description: "Please try again.", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
