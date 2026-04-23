@@ -317,7 +317,10 @@ export function FloatingAIWidget() {
         { role: "assistant", content: data?.response || "I'm sorry, I couldn't generate a response." },
       ]);
     } catch (error) {
-      toast({ title: "Error", description: "Failed to send message. Please try again.", variant: "destructive" });
+      // Reset session on error so the next attempt creates a fresh chat
+      chatSessionIdRef.current = null;
+      currentAgentIdRef.current = null;
+      toast({ title: "Connection lost", description: "Please try again.", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
