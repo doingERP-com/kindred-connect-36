@@ -384,7 +384,7 @@ export function FloatingAIWidget() {
           }`}
           style={{ background: "hsl(222 47% 10%)" }}
         >
-          <div className="flex items-center pr-2 md:pr-3 gap-1.5 md:gap-2">
+          <div className="flex items-center pr-2 md:pr-4 gap-1.5 md:gap-3">
             <input
               type="text"
               value={inputText}
