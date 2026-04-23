@@ -384,7 +384,7 @@ export function FloatingAIWidget() {
           }`}
           style={{ background: "hsl(222 47% 10%)" }}
         >
-          <div className="flex items-end pr-2 pb-2">
+          <div className="flex items-center pr-2">
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
@@ -395,7 +395,7 @@ export function FloatingAIWidget() {
               disabled={isLoading}
             />
 
-            <div className="flex items-center gap-1 mb-1">
+            <div className="flex items-center gap-1 flex-shrink-0">
               {inputText.trim() ? (
                 <button
                   onClick={sendTextMessage}
@@ -412,20 +412,20 @@ export function FloatingAIWidget() {
                 <button
                   onClick={handleToggleCall}
                   disabled={isConnecting || isLoading}
-                  className={`w-11 h-11 md:w-14 md:h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 ${
+                  className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                     isCallActive
                       ? isSpeaking
-                        ? "bg-primary animate-pulse shadow-[0_0_30px_hsl(187_100%_42%/0.5)]"
-                        : "bg-primary shadow-[0_0_20px_hsl(187_100%_42%/0.4)]"
-                      : "bg-primary hover:scale-105 hover:shadow-[0_0_25px_hsl(187_100%_42%/0.4)]"
+                        ? "bg-primary animate-pulse shadow-[0_0_20px_hsl(187_100%_42%/0.5)]"
+                        : "bg-primary shadow-[0_0_15px_hsl(187_100%_42%/0.4)]"
+                      : "bg-primary hover:scale-105 hover:shadow-[0_0_18px_hsl(187_100%_42%/0.4)]"
                   }`}
                 >
                   {isConnecting ? (
-                    <Loader2 className="w-5 h-5 text-primary-foreground animate-spin" />
+                    <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-primary-foreground animate-spin" />
                   ) : isCallActive ? (
-                    <MicOff className="w-5 h-5 text-primary-foreground" />
+                    <MicOff className="w-4 h-4 md:w-5 md:h-5 text-primary-foreground" />
                   ) : (
-                    <Mic className="w-5 h-5 text-primary-foreground" />
+                    <Mic className="w-4 h-4 md:w-5 md:h-5 text-primary-foreground" />
                   )}
                 </button>
               )}
