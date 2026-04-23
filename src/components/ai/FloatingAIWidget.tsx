@@ -384,48 +384,50 @@ export function FloatingAIWidget() {
           }`}
           style={{ background: "hsl(222 47% 10%)" }}
         >
-          <div className="flex items-center pr-2">
+          <div className="flex items-center pr-2.5 md:pr-3 gap-2">
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type a message or tap the mic to speak with Lisa"
               rows={1}
-              className="flex-1 py-2.5 md:py-2.5 px-4 md:px-5 bg-transparent text-foreground placeholder:text-muted-foreground text-sm outline-none resize-none min-h-[44px] md:min-h-[40px]"
+              className="flex-1 py-2.5 md:py-2.5 pl-4 md:pl-5 pr-1 bg-transparent text-foreground placeholder:text-muted-foreground text-sm outline-none resize-none min-h-[44px] md:min-h-[40px]"
               disabled={isLoading}
             />
 
-            <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="flex items-center flex-shrink-0">
               {inputText.trim() ? (
                 <button
                   onClick={sendTextMessage}
                   disabled={isLoading}
-                  className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-secondary hover:bg-secondary/80 transition-colors"
+                  className="w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center bg-secondary hover:bg-secondary/80 transition-colors"
+                  aria-label="Send message"
                 >
                   {isLoading ? (
-                    <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-primary animate-spin" />
+                    <Loader2 className="w-4 h-4 text-primary animate-spin" />
                   ) : (
-                    <Send className="w-4 h-4 md:w-5 md:h-5 text-primary" />
+                    <Send className="w-4 h-4 text-primary" />
                   )}
                 </button>
               ) : (
                 <button
                   onClick={handleToggleCall}
                   disabled={isConnecting || isLoading}
-                  className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center transition-all duration-300 ${
                     isCallActive
                       ? isSpeaking
-                        ? "bg-primary animate-pulse shadow-[0_0_20px_hsl(187_100%_42%/0.5)]"
-                        : "bg-primary shadow-[0_0_15px_hsl(187_100%_42%/0.4)]"
-                      : "bg-primary hover:scale-105 hover:shadow-[0_0_18px_hsl(187_100%_42%/0.4)]"
+                        ? "bg-primary animate-pulse"
+                        : "bg-primary"
+                      : "bg-primary hover:bg-primary/90"
                   }`}
+                  aria-label={isCallActive ? "Stop voice call" : "Start voice call"}
                 >
                   {isConnecting ? (
-                    <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-primary-foreground animate-spin" />
+                    <Loader2 className="w-4 h-4 text-primary-foreground animate-spin" />
                   ) : isCallActive ? (
-                    <MicOff className="w-4 h-4 md:w-5 md:h-5 text-primary-foreground" />
+                    <MicOff className="w-4 h-4 text-primary-foreground" />
                   ) : (
-                    <Mic className="w-4 h-4 md:w-5 md:h-5 text-primary-foreground" />
+                    <Mic className="w-4 h-4 text-primary-foreground" />
                   )}
                 </button>
               )}
