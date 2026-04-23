@@ -223,7 +223,8 @@ export function FloatingAIWidget() {
       const userMessage: Message = { role: "user", content: messageContent };
       setMessages((prev) => [...prev, userMessage]);
       setInputText("");
-      await switchToSpecialAgent(specialAgentId);
+      // Forward the user's actual message to the new agent instead of a hardcoded "Hi"
+      await switchToSpecialAgent(specialAgentId, messageContent);
       return;
     }
 
@@ -266,9 +267,13 @@ export function FloatingAIWidget() {
       ]);
     } catch (error) {
       console.error("Chat error:", error);
+      // Reset session on error — the chat may have expired on Retell's side.
+      // The next message will create a fresh session instead of repeatedly hitting a dead one.
+      chatSessionIdRef.current = null;
+      currentAgentIdRef.current = null;
       toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
+        title: "Connection lost",
+        description: "Reconnecting… please send your message again.",
         variant: "destructive",
       });
     } finally {
