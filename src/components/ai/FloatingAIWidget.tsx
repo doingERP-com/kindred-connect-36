@@ -320,7 +320,7 @@ export function FloatingAIWidget() {
 
   return (
     <div
-      className={`fixed bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-50 w-[95%] md:w-[90%] max-w-3xl transition-all duration-500 ${isGlowing ? "scale-105" : ""}`}
+      className={`fixed bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-50 w-[95%] md:w-[80%] max-w-3xl md:max-w-xl transition-all duration-500 ${isGlowing ? "scale-105" : ""}`}
     >
       {/* Chat Panel */}
       {messages.length > 0 && (
