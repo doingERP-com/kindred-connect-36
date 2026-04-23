@@ -436,13 +436,13 @@ export function FloatingAIWidget() {
 
           {/* Suggestion Chips — inside the box, below the textarea */}
           {messages.length === 0 && !isCallActive && (
-            <div className="flex gap-1.5 md:flex-wrap px-3 md:px-4 pb-2 md:pb-3 pt-1 overflow-x-auto md:overflow-visible no-scrollbar border-t border-border/40">
+            <div className="flex gap-1.5 px-3 md:px-4 pb-2 md:pb-3 pt-1 overflow-x-auto md:overflow-visible md:flex-nowrap md:justify-between no-scrollbar border-t border-border/40">
               {SUGGESTIONS.map((s) => (
                 <button
                   key={s}
                   onClick={() => sendSuggestion(s)}
                   disabled={isLoading}
-                  className="flex-shrink-0 px-2.5 py-1 rounded-full text-xs border border-border text-muted-foreground hover:text-foreground hover:border-primary/60 transition-all duration-200 whitespace-nowrap"
+                  className="flex-shrink-0 md:flex-1 md:min-w-0 px-2.5 py-1 rounded-full text-xs border border-border text-muted-foreground hover:text-foreground hover:border-primary/60 transition-all duration-200 whitespace-nowrap md:truncate md:text-center"
                   style={{ background: "hsl(222 47% 13%)" }}
                 >
                   {s}
