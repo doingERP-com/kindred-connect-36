@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import About from "./pages/About";
 import Consultants from "./pages/Consultants";
 import Contact from "./pages/Contact";
+import BookAppointment from "./pages/BookAppointment";
 import NotFound from "./pages/NotFound";
 import { FloatingAIWidget } from "@/components/ai/FloatingAIWidget";
 import { MagicCursor } from "@/components/ui/MagicCursor";
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/consultants" element={<Consultants />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/book-appointment" element={<BookAppointment />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <FloatingAIWidget />
