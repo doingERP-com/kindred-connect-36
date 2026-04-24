@@ -5,7 +5,6 @@ import { Calendar, Sparkles, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-
 const BookAppointment = () => {
   return (
     <div className="min-h-screen bg-background">
@@ -37,7 +36,6 @@ const BookAppointment = () => {
           </div>
         </section>
 
-
         {/* Calendar Embed */}
         <section className="container mx-auto px-4 lg:px-8">
           <div className="max-w-5xl mx-auto">
@@ -55,9 +53,7 @@ const BookAppointment = () => {
                     </div>
                     <div>
                       <h2 className="font-semibold text-foreground">Select a Time Slot</h2>
-                      <p className="text-xs text-muted-foreground">
-                        Powered by Google Calendar · Instant confirmation
-                      </p>
+                      <p className="text-xs text-muted-foreground">Powered by Google Calendar · Instant confirmation</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -85,14 +81,12 @@ const BookAppointment = () => {
 
             {/* Help footer */}
             <div className="mt-10 text-center">
-              <p className="text-muted-foreground mb-4">
-                Having trouble booking? We're just a call away.
-              </p>
+              <p className="text-muted-foreground mb-4">Having trouble booking? We're just a call away.</p>
               <div className="flex flex-wrap items-center justify-center gap-3">
-                <a href="tel:+12345678906">
+                <a href="tel:+14704031398">
                   <Button variant="outline" size="lg" className="gap-2">
                     <Phone className="w-4 h-4" />
-                    +1 (234) 567-890
+                    +1 470-403-1398
                   </Button>
                 </a>
                 <Link to="/contact">
