@@ -1,27 +1,10 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Helmet } from "react-helmet-async";
-import { Calendar, Clock, CheckCircle2, Sparkles, Phone, Video } from "lucide-react";
+import { Calendar, Sparkles, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-const benefits = [
-  {
-    icon: Clock,
-    title: "Flexible Scheduling",
-    description: "Pick a slot that fits your calendar — instant confirmation.",
-  },
-  {
-    icon: Video,
-    title: "Virtual Consultation",
-    description: "Meet from anywhere via secure video conferencing.",
-  },
-  {
-    icon: CheckCircle2,
-    title: "Tailored Strategy",
-    description: "Discuss your goals with a senior KairosFS consultant.",
-  },
-];
 
 const BookAppointment = () => {
   return (
