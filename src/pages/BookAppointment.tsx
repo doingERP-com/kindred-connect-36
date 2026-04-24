@@ -26,40 +26,17 @@ const BookAppointment = () => {
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
               <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-primary">Free Consultation</span>
+              <span className="text-sm font-medium text-primary">Tradeshow Booking</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Book Your Appointment
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Choose a time that works best for you. Our team will connect with you to
-              understand your needs and craft a tailored solution.
+              Choose a time that works best for you and meet our team at the tradeshow.
             </p>
           </div>
         </section>
 
-        {/* Benefits */}
-        <section className="container mx-auto px-4 lg:px-8 mb-12">
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {benefits.map((b) => (
-              <div
-                key={b.title}
-                className="group relative p-6 rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
-                    <b.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">{b.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {b.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* Calendar Embed */}
         <section className="container mx-auto px-4 lg:px-8">
