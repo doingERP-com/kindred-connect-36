@@ -127,6 +127,9 @@ export function FloatingAIWidget() {
 
       await retellWebClient.startCall({
         accessToken: data.access_token,
+        callId: data.call_id,
+        transport: data.transport,
+        iceServers: data.ice_servers,
         sampleRate: 24000,
       });
     } catch (error) {
